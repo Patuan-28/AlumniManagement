@@ -1,0 +1,284 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="KDP22" Class="AlumniManagementDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Table Name="dbo.Districts" Member="Districts">
+    <Type Name="District">
+      <Column Name="DistrictID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="DistrictName" Type="System.String" DbType="VarChar(100) NOT NULL" CanBeNull="false" />
+      <Column Name="StateID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="District_Alumni" Member="Alumnis" ThisKey="DistrictID" OtherKey="DistrictID" Type="Alumni" />
+      <Association Name="State_District" Member="State" ThisKey="StateID" OtherKey="StateID" Type="State" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Faculty" Member="Faculties">
+    <Type Name="Faculty">
+      <Column Name="FacultyID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="FacultyName" Type="System.String" DbType="NVarChar(100) NOT NULL" CanBeNull="false" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="ModifiedDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="Faculty_Major" Member="Majors" ThisKey="FacultyID" OtherKey="FacultyID" Type="Major" />
+    </Type>
+  </Table>
+  <Table Name="dbo.JobHistory" Member="JobHistories">
+    <Type Name="JobHistory">
+      <Column Name="JobHistoryID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="AlumniID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="JobTitle" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="Company" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="StartDate" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="EndDate" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="ModifiedDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="Alumni_JobHistory" Member="Alumni" ThisKey="AlumniID" OtherKey="AlumniID" Type="Alumni" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Major" Member="Majors">
+    <Type Name="Major">
+      <Column Name="MajorID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="MajorName" Type="System.String" DbType="NVarChar(100) NOT NULL" CanBeNull="false" />
+      <Column Name="FacultyID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="Description" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="ModifiedDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="Major_Alumni" Member="Alumnis" ThisKey="MajorID" OtherKey="MajorID" Type="Alumni" />
+      <Association Name="Faculty_Major" Member="Faculty" ThisKey="FacultyID" OtherKey="FacultyID" Type="Faculty" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.States" Member="States">
+    <Type Name="State">
+      <Column Name="StateID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="StateName" Type="System.String" DbType="VarChar(100) NOT NULL" CanBeNull="false" />
+      <Association Name="State_District" Member="Districts" ThisKey="StateID" OtherKey="StateID" Type="District" />
+    </Type>
+  </Table>
+  <Table Name="dbo.AlumniImages" Member="AlumniImages">
+    <Type Name="AlumniImage">
+      <Column Name="ImageID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="AlumniID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="ImagePath" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="FileName" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="UploadDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="Alumni_AlumniImage" Member="Alumni" ThisKey="AlumniID" OtherKey="AlumniID" Type="Alumni" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.AlumniHobbies" Member="AlumniHobbies">
+    <Type Name="AlumniHobby">
+      <Column Name="AlumniID" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="HobbyID" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Association Name="Hobby_AlumniHobby" Member="Hobby" ThisKey="HobbyID" OtherKey="HobbyID" Type="Hobby" IsForeignKey="true" />
+      <Association Name="Alumni_AlumniHobby" Member="Alumni" ThisKey="AlumniID" OtherKey="AlumniID" Type="Alumni" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Hobbies" Member="Hobbies">
+    <Type Name="Hobby">
+      <Column Name="HobbyID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="Hobby_AlumniHobby" Member="AlumniHobbies" ThisKey="HobbyID" OtherKey="HobbyID" Type="AlumniHobby" />
+    </Type>
+  </Table>
+  <Table Name="dbo.AttachmentType" Member="AttachmentTypes">
+    <Type Name="AttachmentType">
+      <Column Name="AttachmentTypeID" Type="System.Byte" DbType="TinyInt NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="AttachmentType_JobAttachment" Member="JobAttachments" ThisKey="AttachmentTypeID" OtherKey="AttachmentTypeID" Type="JobAttachment" />
+      <Association Name="AttachmentType_JobAttachmentType" Member="JobAttachmentTypes" ThisKey="AttachmentTypeID" OtherKey="AttachmentTypeID" Type="JobAttachmentType" />
+    </Type>
+  </Table>
+  <Table Name="dbo.JobAttachment" Member="JobAttachments">
+    <Type Name="JobAttachment">
+      <Column Name="AttachmentID" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="JobID" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" CanBeNull="false" />
+      <Column Name="AlumniID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="AttachmentTypeID" Type="System.Byte" DbType="TinyInt NOT NULL" CanBeNull="false" />
+      <Column Name="FilePath" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="FileName" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="AttachmentType_JobAttachment" Member="AttachmentType" ThisKey="AttachmentTypeID" OtherKey="AttachmentTypeID" Type="AttachmentType" IsForeignKey="true" />
+      <Association Name="JobPosting_JobAttachment" Member="JobPosting" ThisKey="JobID" OtherKey="JobID" Type="JobPosting" IsForeignKey="true" />
+      <Association Name="Alumni_JobAttachment" Member="Alumni" ThisKey="AlumniID" OtherKey="AlumniID" Type="Alumni" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.JobAttachmentType" Member="JobAttachmentTypes">
+    <Type Name="JobAttachmentType">
+      <Column Name="JobID" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="AttachmentTypeID" Type="System.Byte" DbType="TinyInt NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Association Name="AttachmentType_JobAttachmentType" Member="AttachmentType" ThisKey="AttachmentTypeID" OtherKey="AttachmentTypeID" Type="AttachmentType" IsForeignKey="true" />
+      <Association Name="JobPosting_JobAttachmentType" Member="JobPosting" ThisKey="JobID" OtherKey="JobID" Type="JobPosting" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.JobPosting" Member="JobPostings">
+    <Type Name="JobPosting">
+      <Column Name="JobID" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Title" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="Company" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="JobDescription" Type="System.String" DbType="NVarChar(500) NOT NULL" CanBeNull="false" />
+      <Column Name="EmploymentTypeID" Type="System.Byte" DbType="TinyInt NOT NULL" CanBeNull="false" />
+      <Column Name="MinimumExperience" Type="System.Byte" DbType="TinyInt NOT NULL" CanBeNull="false" />
+      <Column Name="ModifiedDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="IsActive" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="IsClosed" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
+      <Association Name="JobPosting_JobAttachment" Member="JobAttachments" ThisKey="JobID" OtherKey="JobID" Type="JobAttachment" />
+      <Association Name="JobPosting_JobAttachmentType" Member="JobAttachmentTypes" ThisKey="JobID" OtherKey="JobID" Type="JobAttachmentType" />
+      <Association Name="JobPosting_JobSkill" Member="JobSkills" ThisKey="JobID" OtherKey="JobID" Type="JobSkill" />
+      <Association Name="JobPosting_JobCandidate" Member="JobCandidates" ThisKey="JobID" OtherKey="JobID" Type="JobCandidate" />
+      <Association Name="EmploymentType_JobPosting" Member="EmploymentType" ThisKey="EmploymentTypeID" OtherKey="EmploymentTypeID" Type="EmploymentType" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Skills" Member="Skills">
+    <Type Name="Skill">
+      <Column Name="SkillID" Type="System.Byte" DbType="TinyInt NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="ModifiedDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="IsActive" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Association Name="Skill_JobSkill" Member="JobSkills" ThisKey="SkillID" OtherKey="SkillID" Type="JobSkill" />
+    </Type>
+  </Table>
+  <Table Name="dbo.EmploymentType" Member="EmploymentTypes">
+    <Type Name="EmploymentType">
+      <Column Name="EmploymentTypeID" Type="System.Byte" DbType="TinyInt NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="EmploymentType_JobPosting" Member="JobPostings" ThisKey="EmploymentTypeID" OtherKey="EmploymentTypeID" Type="JobPosting" />
+    </Type>
+  </Table>
+  <Table Name="dbo.JobSkill" Member="JobSkills">
+    <Type Name="JobSkill">
+      <Column Name="JobID" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="SkillID" Type="System.Byte" DbType="TinyInt NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Association Name="JobPosting_JobSkill" Member="JobPosting" ThisKey="JobID" OtherKey="JobID" Type="JobPosting" IsForeignKey="true" />
+      <Association Name="Skill_JobSkill" Member="Skill" ThisKey="SkillID" OtherKey="SkillID" Type="Skill" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.JobCandidate" Member="JobCandidates">
+    <Type Name="JobCandidate">
+      <Column Name="AlumniID" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="JobID" Type="System.Guid" DbType="UniqueIdentifier NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="ApplyDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="JobPosting_JobCandidate" Member="JobPosting" ThisKey="JobID" OtherKey="JobID" Type="JobPosting" IsForeignKey="true" />
+      <Association Name="Alumni_JobCandidate" Member="Alumni" ThisKey="AlumniID" OtherKey="AlumniID" Type="Alumni" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Alumni" Member="Alumnis">
+    <Type Name="Alumni">
+      <Column Name="AlumniID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="FirstName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="MiddleName" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="LastName" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="Email" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="MobileNumber" Type="System.String" DbType="NVarChar(15)" CanBeNull="true" />
+      <Column Name="Address" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="DistrictID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="DateOfBirth" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="GraduationYear" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="Degree" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="MajorID" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="LinkedInProfile" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="PhotoPath" Type="System.String" DbType="VarChar(255)" CanBeNull="true" />
+      <Column Name="PhotoName" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="Gender" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="ModifiedDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="Alumni_JobHistory" Member="JobHistories" ThisKey="AlumniID" OtherKey="AlumniID" Type="JobHistory" />
+      <Association Name="Alumni_AlumniImage" Member="AlumniImages" ThisKey="AlumniID" OtherKey="AlumniID" Type="AlumniImage" />
+      <Association Name="Alumni_AlumniHobby" Member="AlumniHobbies" ThisKey="AlumniID" OtherKey="AlumniID" Type="AlumniHobby" />
+      <Association Name="Alumni_JobAttachment" Member="JobAttachments" ThisKey="AlumniID" OtherKey="AlumniID" Type="JobAttachment" />
+      <Association Name="Alumni_JobCandidate" Member="JobCandidates" ThisKey="AlumniID" OtherKey="AlumniID" Type="JobCandidate" />
+      <Association Name="District_Alumni" Member="District" ThisKey="DistrictID" OtherKey="DistrictID" Type="District" IsForeignKey="true" />
+      <Association Name="Major_Alumni" Member="Major" ThisKey="MajorID" OtherKey="MajorID" Type="Major" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Events" Member="Events">
+    <Type Name="Event">
+      <Column Name="EventID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Title" Type="System.String" DbType="VarChar(100) NOT NULL" CanBeNull="false" />
+      <Column Name="Description" Type="System.String" DbType="VarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="EventImagePath" Type="System.String" DbType="VarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="EventImageName" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="StartDate" Type="System.DateTime" DbType="Date NOT NULL" CanBeNull="false" />
+      <Column Name="EndDate" Type="System.DateTime" DbType="Date NOT NULL" CanBeNull="false" />
+      <Column Name="IsClosed" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="ModifiedDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+    </Type>
+  </Table>
+  <Table Name="dbo.PhotoAlbum" Member="PhotoAlbums">
+    <Type Name="PhotoAlbum">
+      <Column Name="AlbumID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="AlbumName" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="ModifiedDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="PhotoAlbum_Photo" Member="Photos" ThisKey="AlbumID" OtherKey="AlbumID" Type="Photo" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Photos" Member="Photos">
+    <Type Name="Photo">
+      <Column Name="PhotoID" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="AlbumID" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="PhotoPath" Type="System.String" DbType="VarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="PhotoFileName" Type="System.String" DbType="VarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="IsPhotoAlbumThumbnail" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
+      <Column Name="ModifiedDate" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="PhotoAlbum_Photo" Member="PhotoAlbum" ThisKey="AlbumID" OtherKey="AlbumID" Type="PhotoAlbum" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.AspNetPermissions" Member="AspNetPermissions">
+    <Type Name="AspNetPermission">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="NVarChar(256) NOT NULL" CanBeNull="false" />
+      <Association Name="AspNetPermission_AspNetRolePermission" Member="AspNetRolePermissions" ThisKey="Id" OtherKey="PermissionId" Type="AspNetRolePermission" />
+    </Type>
+  </Table>
+  <Table Name="dbo.AspNetRolePermissions" Member="AspNetRolePermissions">
+    <Type Name="AspNetRolePermission">
+      <Column Name="RoleId" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="PermissionId" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Association Name="AspNetPermission_AspNetRolePermission" Member="AspNetPermission" ThisKey="PermissionId" OtherKey="Id" Type="AspNetPermission" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="AspNetRole_AspNetRolePermission" Member="AspNetRole" ThisKey="RoleId" OtherKey="Id" Type="AspNetRole" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.AspNetRoles" Member="AspNetRoles">
+    <Type Name="AspNetRole">
+      <Column Name="Id" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="NVarChar(256) NOT NULL" CanBeNull="false" />
+      <Association Name="AspNetRole_AspNetRolePermission" Member="AspNetRolePermissions" ThisKey="Id" OtherKey="RoleId" Type="AspNetRolePermission" />
+      <Association Name="AspNetRole_AspNetUserRole" Member="AspNetUserRoles" ThisKey="Id" OtherKey="RoleId" Type="AspNetUserRole" />
+    </Type>
+  </Table>
+  <Table Name="dbo.AspNetUserClaims" Member="AspNetUserClaims">
+    <Type Name="AspNetUserClaim">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="UserId" Type="System.String" DbType="NVarChar(128) NOT NULL" CanBeNull="false" />
+      <Column Name="ClaimType" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="ClaimValue" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Association Name="AspNetUser_AspNetUserClaim" Member="AspNetUser" ThisKey="UserId" OtherKey="Id" Type="AspNetUser" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.AspNetUserLogins" Member="AspNetUserLogins">
+    <Type Name="AspNetUserLogin">
+      <Column Name="LoginProvider" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="ProviderKey" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="UserId" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Association Name="AspNetUser_AspNetUserLogin" Member="AspNetUser" ThisKey="UserId" OtherKey="Id" Type="AspNetUser" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.AspNetUserRoles" Member="AspNetUserRoles">
+    <Type Name="AspNetUserRole">
+      <Column Name="UserId" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="RoleId" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Association Name="AspNetRole_AspNetUserRole" Member="AspNetRole" ThisKey="RoleId" OtherKey="Id" Type="AspNetRole" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="AspNetUser_AspNetUserRole" Member="AspNetUser" ThisKey="UserId" OtherKey="Id" Type="AspNetUser" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.AspNetUsers" Member="AspNetUsers">
+    <Type Name="AspNetUser">
+      <Column Name="Id" Type="System.String" DbType="NVarChar(128) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="FullName" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="Email" Type="System.String" DbType="NVarChar(256) NOT NULL" CanBeNull="false" />
+      <Column Name="EmailConfirmed" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="PasswordHash" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="SecurityStamp" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="PhoneNumber" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" />
+      <Column Name="PhoneNumberConfirmed" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="TwoFactorEnabled" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="LockoutEndDateUtc" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="LockoutEnabled" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="AccessFailedCount" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="UserName" Type="System.String" DbType="NVarChar(256) NOT NULL" CanBeNull="false" />
+      <Association Name="AspNetUser_AspNetUserClaim" Member="AspNetUserClaims" ThisKey="Id" OtherKey="UserId" Type="AspNetUserClaim" />
+      <Association Name="AspNetUser_AspNetUserLogin" Member="AspNetUserLogins" ThisKey="Id" OtherKey="UserId" Type="AspNetUserLogin" />
+      <Association Name="AspNetUser_AspNetUserRole" Member="AspNetUserRoles" ThisKey="Id" OtherKey="UserId" Type="AspNetUserRole" />
+    </Type>
+  </Table>
+</Database>

@@ -1,0 +1,220 @@
+﻿@model ExamWeb.AlumniService.AlumniDTO
+
+@{
+    ViewBag.Title = "Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Edit Alumni Profile</h2>
+
+
+@using (Html.BeginForm())
+{
+@Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @Html.HiddenFor(model => model.AlumniID)
+    <div class="form-group">
+        First Name
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group mt-2">
+        Middle Name
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.MiddleName, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.MiddleName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group mt-2">
+        Last Name
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group mt-2">
+        @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group mt-2">
+        Mobile Number
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.MobileNumber, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.MobileNumber, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group mt-2">
+        @Html.LabelFor(model => model.Address, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group mt-2">
+        @Html.Label("State")
+        @Html.DropDownListFor(model => model.StateID, (IEnumerable<SelectListItem>)ViewBag.StatesList, "Select State", new { @class = "form-control", id = "StateDropdown" })
+        @Html.ValidationMessageFor(model => model.StateID, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mt-2">
+        @Html.Label("District")
+        @Html.DropDownListFor(model => model.DistrictID,
+            ViewBag.DistrictsList as List<SelectListItem> ?? new List<SelectListItem>(),
+            "Select District",
+            new { @class = "form-control", id = "DistrictDropdown" })
+        @Html.ValidationMessageFor(model => model.DistrictID, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mt-2">
+        Date of Birth
+        <div class="col-md-10">
+            <input type="date" id="DateOfBirth" name="DateOfBirth" class="form-control"
+                   value="@(Model?.DateOfBirth != null ? Model.DateOfBirth.Value.ToString("yyyy-MM-dd") : "")" />
+            @Html.ValidationMessageFor(model => model.DateOfBirth, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group mt-2">
+        Graduation Year
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.GraduationYear, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.GraduationYear, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group mt-2">
+        @Html.LabelFor(model => model.Degree, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(model => model.Degree, new SelectList(
+                new List<SelectListItem>
+                {
+                    new SelectListItem { Text = "D3", Value = "D3" },
+                    new SelectListItem { Text = "S1", Value = "S1" },
+                    new SelectListItem { Text = "S2", Value = "S2" },
+                    new SelectListItem { Text = "S3", Value = "S3" }
+                }, "Value", "Text", ViewBag.SelectedDegree), "Select Degree", new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.Degree, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group mt-2">
+        @Html.Label("Faculty")
+        @Html.DropDownListFor(model => model.FacultyID, (IEnumerable<SelectListItem>)ViewBag.FacultiesList, "Select Faculty", new { @class = "form-control", id = "FacultyDropdown" })
+        @Html.ValidationMessageFor(model => model.FacultyID, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mt-2">
+        @Html.Label("Major")
+        @Html.DropDownListFor(model => model.MajorID,
+            ViewBag.MajorsList as List<SelectListItem> ?? new List<SelectListItem>(),
+            "Select Major",
+            new { @class = "form-control", id = "MajorDropdown" })
+        @Html.ValidationMessageFor(model => model.MajorID, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mt-2">
+        LinkedIn Profile
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.LinkedInProfile, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.LinkedInProfile, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group row mt-2">
+        <div class="col-md-auto">
+            <input type="submit" value="Create" class="btn btn-success" />
+        </div>
+        <div class="col">
+            @Html.ActionLink("Cancel", "Index", null, new { @class = "btn btn-secondary" })
+        </div>
+    </div>
+</div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    @*<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>*@
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $('#StateDropdown').change(function () {
+            var selectedState = $(this).val();
+            if (selectedState) {
+                $.ajax({
+                    url: '@Url.Action("GetDistrictsByStateID", "Alumni")',
+                    type: 'GET',
+                    data: { stateID: selectedState },
+                    dataType: 'json',
+                    success: function (data) {
+                        var districtDropdown = $('#DistrictDropdown');
+                        districtDropdown.empty();
+                        districtDropdown.append($('<option></option>').val('').text('Select District'));
+
+                        $.each(data, function (i, item) {
+                            districtDropdown.append($('<option></option>').val(item.DistrictID).text(item.DistrictNames));
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", error);
+                        alert('Error retrieving districts.');
+                    }
+                });
+            } else {
+                $('#DistrictDropdown').empty().append($('<option></option>').val('').text('Select District'));
+            }
+        });
+    });
+    $(document).ready(function () {
+        $('#FacultyDropdown').change(function () {
+            var selectedFaculty = $(this).val();
+            if (selectedFaculty) {
+                $.ajax({
+                    url: '@Url.Action("GetMajorByFacultyID", "Alumni")',
+                    type: 'GET',
+                    data: { facultyID: selectedFaculty },
+                    dataType: 'json',
+                    success: function (data) {
+                        var majorDropdown = $('#MajorDropdown');
+                        majorDropdown.empty();
+                        majorDropdown.append($('<option></option>').val('').text('Select Major'));
+
+                        $.each(data, function (i, item) {
+                            majorDropdown.append($('<option></option>').val(item.MajorID).text(item.MajorNames));
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", error);
+                        alert('Error retrieving majors.');
+                    }
+                });
+            } else {
+                $('#MajorDropdown').empty().append($('<option></option>').val('').text('Select Major'));
+            }
+        });
+    });
+    $(function () {
+        $(".datepicker").datepicker({
+            dateFormat: "yy-mm-dd",
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true
+        });
+    });
+    </script>
+}
+

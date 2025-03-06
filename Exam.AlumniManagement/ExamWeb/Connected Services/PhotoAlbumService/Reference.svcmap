@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="9043db0e-6845-4bec-a786-b47a322705e5" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:50219/Services/PhotoAlbumService.svc" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="PhotoAlbumService.xsd" MetadataType="Schema" ID="d0c30471-c849-4419-a0c4-98bf42a3cade" SourceId="1" SourceUrl="http://localhost:50219/Services/PhotoAlbumService.svc?xsd=xsd2" />
+    <MetadataFile FileName="PhotoAlbumService.wsdl" MetadataType="Wsdl" ID="b15f79e1-486f-427b-9c4a-489210fb2a2f" SourceId="1" SourceUrl="http://localhost:50219/Services/PhotoAlbumService.svc?wsdl" />
+    <MetadataFile FileName="PhotoAlbumService.disco" MetadataType="Disco" ID="d4b79f1e-ae59-462b-8e75-7889333b92dc" SourceId="1" SourceUrl="http://localhost:50219/Services/PhotoAlbumService.svc?disco" />
+    <MetadataFile FileName="PhotoAlbumService1.xsd" MetadataType="Schema" ID="afc8d6c5-9a63-4610-a950-08dda212f4a2" SourceId="1" SourceUrl="http://localhost:50219/Services/PhotoAlbumService.svc?xsd=xsd1" />
+    <MetadataFile FileName="PhotoAlbumService2.xsd" MetadataType="Schema" ID="016f2b5a-1955-4beb-9dc7-b64dfb406b67" SourceId="1" SourceUrl="http://localhost:50219/Services/PhotoAlbumService.svc?xsd=xsd0" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

@@ -1,0 +1,508 @@
+﻿@model IEnumerable<ExamWeb.Models.PhotoAlbumModel>
+
+@{
+    ViewBag.Title = "Photo Gallery";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.7/css/fixedHeader.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        .album-card {
+            transition: transform 0.2s ease-in-out;
+        }
+
+            .album-card:hover {
+                transform: scale(1.05);
+            }
+
+        .album-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-bar {
+            width: 250px;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+}
+
+<h2>Photo Gallery</h2>
+
+<div class="toolbar mb-3">
+    <div>
+        <button id="createButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">Add Album</button>
+        <button id="addPhotoButton" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addModal">Add Photo</button>
+        <button id="deleteSelected" class="btn btn-danger">
+            Delete Selected
+        </button>
+    </div>
+    <input type="text" id="searchInput" class="form-control search-bar" placeholder="Search album...">
+</div>
+
+<div class="container mt-4">
+    @*<button id="deleteSelected" class="btn btn-danger mb-3">Delete Selected</button>*@
+    <div class="row row-cols-1 row-cols-md-5 g-4" id="albumContainer">
+        @foreach (var album in Model)
+        {
+            <div class="col album-item" data-name="@album.AlbumName">
+                <div class="card album-card">
+                    <a href="@Url.Action("Index", "Photo", new { albumID = album.AlbumID })">
+                        <img src="@((!string.IsNullOrEmpty(album.ThumbnailPhotoPath) && !string.IsNullOrEmpty(album.ThumbnailPhotoName))
+                            ? Url.Content(album.ThumbnailPhotoPath.TrimEnd('/') + "/" + album.ThumbnailPhotoName)
+                            : "https://www.shutterstock.com/image-vector/no-image-available-icon-template-260nw-1340428865.jpg")"
+                             class="album-img"
+                             alt="@album.AlbumName">
+
+                    </a>
+                    <div class="card-body">
+                        <h5 class="card-title">@album.AlbumName</h5>
+                        <p class="card-text text-muted">@album.ModifiedDate.ToString("dd MMM yyyy")</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal" onclick="loadEditAlbum('@album.AlbumID')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger deleteButton" data-id="@album.AlbumID">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            <input type="checkbox" class="delete-checkbox" value="@album.AlbumID"> <!-- Perbaikan disini -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+
+<div class="d-flex justify-content-between align-items-center mt-4">
+    <div>
+        <label for="showEntries">Show</label>
+        <select id="showEntries" class="form-select d-inline w-auto">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+        </select>
+        entries
+    </div>
+    <div class="pagination-container d-flex justify-content-center flex-grow-1">
+        <ul class="pagination pagination-l"></ul>
+    </div>
+</div>
+
+<!-- Modal for Add Album -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createModalLabel">Create Album</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAlbumForm">
+                    <div class="mb-3">
+                        <label for="AlbumName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="AlbumName" name="AlbumName" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Edit Album -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Album</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editAlbumForm">
+                    <input type="hidden" id="editAlbumID" name="AlbumID"> <!-- ID Album (Hidden) -->
+                    <div class="mb-3">
+                        <label for="editAlbumName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="editAlbumName" name="AlbumName" required>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*--------------------------------------------------------------------------------------------------------------------------------------------------*@
+
+<!-- Modal Add Photo -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Add New Photo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addPhotoForm" enctype="multipart/form-data" method="post" novalidate>
+                    <div class="mb-3">
+                        <label for="albumSelect" class="form-label">Select Album</label>
+                        <select class="form-select" id="albumSelect" name="AlbumID" required>
+                            <option value="" disabled selected>Choose an album</option>
+                            @if (ViewBag.AlbumList != null)
+                            {
+                                foreach (var album in ViewBag.AlbumList)
+                                {
+                                    <option value="@album.Value">@album.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="photoFile" class="form-label">Upload Photo</label>
+                        <input type="file" class="form-control" id="photoFile" name="PhotoFile" accept="image/*" required>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Photo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            let albumsPerPage = 10;
+            let albums = $(".album-item");
+            let totalAlbums = albums.length;
+            let totalPages = Math.ceil(totalAlbums / albumsPerPage);
+            let currentPage = 1;
+
+            function showAlbums() {
+                albums.hide();
+                let start = (currentPage - 1) * albumsPerPage;
+                let end = start + albumsPerPage;
+                albums.slice(start, end).show();
+                renderPagination();
+            }
+
+            function renderPagination() {
+                $(".pagination").empty();
+
+                let firstDisabled = currentPage === 1 ? 'disabled' : '';
+                let prevDisabled = currentPage === 1 ? 'disabled' : '';
+                let nextDisabled = currentPage === totalPages ? 'disabled' : '';
+                let lastDisabled = currentPage === totalPages ? 'disabled' : '';
+
+                $(".pagination").append(
+                    `<li class="page-item ${firstDisabled}">
+                        <a class="page-link" href="#" data-page="1">«« </a>
+                    </li>
+                    <li class="page-item ${prevDisabled}">
+                        <a class="page-link" href="#" data-page="${currentPage - 1}"> Prev</a>
+                    </li>`
+                );
+
+                for (let i = 1; i <= totalPages; i++) {
+                    $(".pagination").append(
+                        `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>`
+                    );
+                }
+
+                $(".pagination").append(
+                    `<li class="page-item ${nextDisabled}">
+                        <a class="page-link" href="#" data-page="${currentPage + 1}">Next </a>
+                    </li>
+                    <li class="page-item ${lastDisabled}">
+                        <a class="page-link" href="#" data-page="${totalPages}"> »»</a>
+                    </li>`
+                );
+            }
+
+
+            $(document).on("click", ".page-link", function (e) {
+                e.preventDefault();
+                let newPage = parseInt($(this).data("page"));
+                if (newPage >= 1 && newPage <= totalPages) {
+                    currentPage = newPage;
+                    showAlbums();
+                }
+            });
+
+            $("#showEntries").change(function () {
+                albumsPerPage = parseInt($(this).val());
+                totalPages = Math.ceil(totalAlbums / albumsPerPage);
+                currentPage = 1;
+                showAlbums();
+            });
+
+            $("#searchInput").on("keyup", function () {
+                let query = $(this).val().toLowerCase();
+                if (query.length < 3) {
+                    albums.show();
+                    return;
+                }
+
+                albums.hide().filter(function () {
+                    return $(this).data("name").toLowerCase().includes(query);
+                }).show();
+            });
+
+            $("#addAlbumForm").on("submit", function (event) {
+                event.preventDefault();
+                var albumName = $("#AlbumName").val();
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("UpsertPhotoAlbum", "PhotoAlbum")",
+                    data: { AlbumName: albumName },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Success!",
+                                text: "Album added successfully!",
+                                showConfirmButton: false,
+                                timer: 2000
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({ icon: "error", title: "Error!", text: "Failed to add album." });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({ icon: "error", title: "Error!", text: "An unexpected error occurred." });
+                    }
+                });
+            });
+
+            $("#editAlbumForm").on("submit", function (event) {
+                event.preventDefault();
+
+                var albumID = $("#editAlbumID").val(); // Ambil ID Album
+                var albumName = $("#editAlbumName").val(); // Ambil Nama Album
+
+                $.ajax({
+                    type: "POST", // Bisa juga pakai "PUT" kalau backend mendukung
+                    url: "@Url.Action("UpsertPhotoAlbum", "PhotoAlbum")",
+                    data: { AlbumID: albumID, AlbumName: albumName }, // Kirim ID dan Nama Album
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Success!",
+                                text: "Album updated successfully!",
+                                showConfirmButton: false,
+                                timer: 2000
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({ icon: "error", title: "Error!", text: "Failed to update album." });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({ icon: "error", title: "Error!", text: "An unexpected error occurred." });
+                    }
+                });
+            });
+
+
+            showAlbums();
+        });
+
+        // Delete single album
+        $(document).on('click', '.deleteButton', function () {
+            const itemId = $(this).data('id');
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Once deleted, you will not be able to recover this item!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/PhotoAlbum/Delete',
+                        type: 'POST',
+                        data: { id: itemId },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire("Deleted!", response.message, "success").then(() => {
+                                    location.reload(); // Reload halaman setelah sukses
+                                });
+                            } else {
+                                Swal.fire("Error!", response.message, "error");
+                            }
+                        },
+                        error: function () {
+                            Swal.fire("Error!", "Unable to delete the item. Please try again.", "error");
+                        }
+                    });
+                }
+            });
+        });
+
+        // Delete multiple albums
+        $('#deleteSelected').on('click', function () {
+            var selectedIds = [];
+            $('.delete-checkbox:checked').each(function () {
+                selectedIds.push($(this).val()); // Pastikan value checkbox adalah AlbumID
+            });
+
+            if (selectedIds.length > 0) {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You will not be able to recover these items!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete them!",
+                    cancelButtonText: "No, keep them"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/PhotoAlbum/DeleteSelected', // Endpoint sudah benar
+                            type: 'POST',
+                            data: { ids: selectedIds },
+                            traditional: true, // Agar array dikirim dengan benar
+                            success: function (response) {
+                                if (response.success) {
+                                    Swal.fire("Deleted!", response.message, "success").then(() => {
+                                        location.reload(); // Reload halaman setelah sukses
+                                    });
+                                } else {
+                                    Swal.fire("Error!", response.message, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error!", "Unable to delete the items. Please try again.", "error");
+                            }
+                        });
+                    }
+                });
+            } else {
+                Swal.fire("No items selected", "Please select items to delete.", "info");
+            }
+        });
+
+        $(document).ready(function () {
+            $('#file').on('change', function (event) {
+                var file = event.target.files[0]; // Get the selected file
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#photoPreview').attr('src', e.target.result).css('display', 'block'); // Set src and ensure visibility
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    $('#photoPreview').attr('src', '').css('display', 'none'); // Hide preview if no file selected
+                }
+            });
+        });
+
+        function loadEditAlbum(albumID) {
+            $.ajax({
+                url: '/PhotoAlbum/GetPhotoAlbumById', // Sesuaikan dengan route yang benar
+                type: 'GET',
+                data: { id: albumID },
+                success: function (response) {
+                    if (response.error) {
+                        Swal.fire('Error', 'Album not found!', 'error');
+                    } else {
+                        // Bind data ke form modal edit
+                        $("#editAlbumID").val(response.AlbumID);
+                        $("#editAlbumName").val(response.AlbumName);
+                        $("#editAlbumDate").val(response.ModifiedDate); // Sesuaikan jika ada field tanggal
+                        $("#editModal").modal('show'); // Tampilkan modal
+                    }
+                },
+                error: function () {
+                    Swal.fire('Error', 'Failed to fetch album data.', 'error');
+                }
+            });
+        }
+
+        //Upsert Photo Script--------------------------------------
+
+       $(document).ready(function () {
+            $("#addPhotoForm").on("submit", function (event) {
+                event.preventDefault();
+
+                var formData = new FormData(this);
+                var albumID = $("#albumSelect").val();
+                var file = $("#photoFile")[0].files[0];
+
+                if (!albumID || !file) {
+                    Swal.fire({ icon: "warning", title: "Warning!", text: "Please select an album and upload a photo." });
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "/Photo/Create", // Pastikan sesuai dengan controller
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Success!",
+                                text: response.message,
+                                showConfirmButton: false,
+                                timer: 2000
+                            }).then(() => {
+                                $("#addPhotoForm")[0].reset(); // Reset form
+                                $("#addModal").modal("hide"); // Tutup modal
+                                location.reload(); // Refresh halaman
+                            });
+                        } else {
+                            Swal.fire({ icon: "error", title: "Error!", text: response.message || "Failed to add photo." });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({ icon: "error", title: "Error!", text: "An unexpected error occurred." });
+                    }
+                });
+            });
+        });
+
+
+
+    </script>
+}

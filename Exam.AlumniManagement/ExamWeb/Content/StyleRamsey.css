@@ -1,0 +1,25 @@
+﻿/*.dataTables_wrapper {
+    width: 100%; 
+    max-width: 1200px; 
+    min-width: 600px; 
+    margin: 0 auto; 
+}
+
+    .dataTables_wrapper .dataTables_paginate {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .dataTables_wrapper .dataTables_info {
+        align-self: center;
+        padding-top: 8px; 
+    }
+
+    .dataTables_wrapper .bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0; 
+    }
+*/

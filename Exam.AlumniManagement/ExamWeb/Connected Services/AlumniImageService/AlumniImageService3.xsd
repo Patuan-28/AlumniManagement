@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/System.Data.Linq" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/System.Data.Linq" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:50219/Services/AlumniImageService.svc?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/ExamWCF.Entities" />
+  <xs:import schemaLocation="http://localhost:50219/Services/AlumniImageService.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+  <xs:complexType name="EntityRefOfAlumniDi3362D5">
+    <xs:annotation>
+      <xs:appinfo>
+        <GenericType Name="EntityRefOf{0}{#}" Namespace="http://schemas.datacontract.org/2004/07/System.Data.Linq" xmlns="http://schemas.microsoft.com/2003/10/Serialization/">
+          <GenericParameter Name="Alumni" Namespace="http://schemas.datacontract.org/2004/07/ExamWCF.Entities" />
+        </GenericType>
+        <IsValueType xmlns="http://schemas.microsoft.com/2003/10/Serialization/">true</IsValueType>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/ExamWCF.Entities" minOccurs="0" name="Entity" nillable="true" type="q1:Alumni" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="EntityRefOfAlumniDi3362D5" nillable="true" type="tns:EntityRefOfAlumniDi3362D5" />
+</xs:schema>

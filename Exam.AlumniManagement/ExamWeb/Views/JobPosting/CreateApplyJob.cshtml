@@ -1,0 +1,61 @@
+﻿@{
+    ViewBag.Title = "Apply Job";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white text-center">
+            <h4>Apply to Job</h4>
+        </div>
+        <div class="card-body">
+            <p><strong>Job Title:</strong> @ViewBag.JobTitle</p>
+            <p><strong>Job Description:</strong> @ViewBag.JobDescription</p>
+            <p><strong>Min. Experience:</strong> @ViewBag.MinExperience years</p>
+            <p><strong>Skills:</strong> @ViewBag.Skills</p>
+
+            <form id="applyForm" method="post" enctype="multipart/form-data" action="@Url.Action("ApplyToJob", "JobPosting", new {jobId = ViewBag.JobID})">
+                @Html.AntiForgeryToken()
+
+                <!-- Alumni Dropdown -->
+                <div class="mb-3">
+                    <label for="alumni" class="form-label">Alumni</label>
+                    <select class="form-select" id="alumni" name="alumni">
+                        <option value="">Select Alumni</option>
+                        @foreach (var alumni in ViewBag.AlumniList as IEnumerable<SelectListItem>)
+                        {
+                            <option value="@alumni.Value">@alumni.Text</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="row">
+                    @foreach (var attachment in ViewBag.AttachmentTypes)
+                    {
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="@attachment" class="form-label">@attachment</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-paperclip"></i></span>
+                                    <input type="file" class="form-control" id="@attachment" name="attachments[@attachment]">
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="@Url.Action("Index", "JobPosting")" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">

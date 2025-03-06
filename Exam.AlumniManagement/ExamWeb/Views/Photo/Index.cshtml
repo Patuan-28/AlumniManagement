@@ -1,0 +1,369 @@
+﻿@model IEnumerable<ExamWeb.Models.PhotoModel>
+
+@{
+    ViewBag.Title = "Photo Gallery";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.7/css/fixedHeader.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        .photo-card {
+            transition: transform 0.2s ease-in-out;
+        }
+
+            .photo-card:hover {
+                transform: scale(1.05);
+            }
+
+        .photo-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-bar {
+            width: 250px;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .entries-select {
+            width: 100px;
+        }
+    </style>
+}
+
+<h2>@ViewBag.AlbumName</h2>
+
+<div class="toolbar mb-3">
+    <div>
+        <button class="btn btn-secondary" onclick="history.back()"><i class="fas fa-arrow-left"></i> Back</button>
+        <button id="addPhotoButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPhotoModal">Add Photo</button>
+        <button id="deleteSelected" class="btn btn-danger">Delete Selected</button>
+    </div>
+    @*<input type="text" id="searchInput" class="form-control search-bar" placeholder="Search photo...">*@
+</div>
+
+<div class="container mt-4">
+    <div class="row row-cols-1 row-cols-md-5 g-4" id="photoContainer">
+        @foreach (var photo in Model)
+        {
+            <div class="col photo-item" data-name="@photo.PhotoFileName">
+                <div class="card photo-card">
+                    <img src="@Url.Content(photo.PhotoPath + "/" + photo.PhotoFileName)" class="photo-img" alt="@photo.PhotoFileName">
+                </div>
+                <input type="checkbox" class="delete-checkbox" value="@photo.PhotoID">
+
+                <input type="radio" name="thumbnailRadio" class="thumbnail-radio"
+                       value="@photo.PhotoID"
+                       data-album-id="@photo.AlbumID"
+                       @(photo.IsPhotoAlbumThumbnail ? "checked" : "")> Set Album Thumbnail
+            </div>
+        }
+    </div>
+</div>
+
+<div class="pagination-container">
+    <div>
+        <label>
+            Show
+            <select id="entriesSelect" class="form-select entries-select">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+            </select> entries
+        </label>
+    </div>
+    <ul class="pagination"></ul>
+</div>
+
+<!-- Modal Preview -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imagePreviewLabel">Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage" class="img-fluid" src="" alt="Preview">
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <button id="prevImage" class="btn btn-secondary">Prev</button>
+                <button id="nextImage" class="btn btn-secondary">Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add Photo -->
+<div class="modal fade" id="addPhotoModal" tabindex="-1" aria-labelledby="addPhotoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPhotoLabel">Upload Photo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadPhotoForm" enctype="multipart/form-data" method="post"  novalidate>
+                    <input type="hidden" name="AlbumID" id="albumID" value="@ViewBag.AlbumID">
+                    <div class="mb-3">
+                        <label for="photoFile" class="form-label">Choose Photo</label>
+                        <input type="file" class="form-control" id="photoFile" name="PhotoFile" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            let photosPerPage = parseInt($("#entriesSelect").val());
+            let photos = $(".photo-item");
+            let totalPhotos = photos.length;
+            let totalPages = Math.ceil(totalPhotos / photosPerPage);
+            let currentPage = 1;
+
+            function showPhotos() {
+                photos.hide();
+                let start = (currentPage - 1) * photosPerPage;
+                let end = start + photosPerPage;
+                photos.slice(start, end).show();
+                renderPagination();
+            }
+
+            function renderPagination() {
+                $(".pagination").empty();
+                totalPages = Math.ceil(photos.length / photosPerPage);
+
+                let prevDisabled = currentPage === 1 ? 'disabled' : '';
+                let nextDisabled = currentPage === totalPages ? 'disabled' : '';
+
+                $(".pagination").append(
+                    `<li class="page-item ${prevDisabled}">
+                                        <a class="page-link" href="#" data-page="${currentPage - 1}">« Previous</a>
+                                    </li>`
+                );
+
+                for (let i = 1; i <= totalPages; i++) {
+                    $(".pagination").append(
+                        `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                                        </li>`
+                    );
+                }
+
+                $(".pagination").append(
+                    `<li class="page-item ${nextDisabled}">
+                                        <a class="page-link" href="#" data-page="${currentPage + 1}">Next »</a>
+                                    </li>`
+                );
+            }
+
+            $(document).on("click", ".page-link", function (e) {
+                e.preventDefault();
+                let newPage = parseInt($(this).data("page"));
+                if (newPage >= 1 && newPage <= totalPages) {
+                    currentPage = newPage;
+                    showPhotos();
+                }
+            });
+
+            $("#searchInput").on("keyup", function () {
+                let query = $(this).val().toLowerCase();
+                photos.hide();
+                photos.filter(function () {
+                    return $(this).data("name").toLowerCase().includes(query);
+                }).show();
+                currentPage = 1;
+                totalPages = Math.ceil($(".photo-item:visible").length / photosPerPage);
+                showPhotos();
+            });
+
+            $("#entriesSelect").on("change", function () {
+                photosPerPage = parseInt($(this).val());
+                currentPage = 1;
+                totalPages = Math.ceil(photos.length / photosPerPage);
+                showPhotos();
+            });
+
+            $('#deleteSelected').on('click', function () {
+                var selectedPhotos = $('.delete-checkbox:checked').map(function () {
+                    return $(this).val();
+                }).get();
+
+                if (selectedPhotos.length === 0) {
+                    Swal.fire("No items selected", "Please select items to delete.", "info");
+                    return;
+                }
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You will not be able to recover these photos!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete them!",
+                    cancelButtonText: "No, keep them"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/Photo/DeleteSelected',  // Ensure this matches your backend
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({ ids: selectedPhotos }),
+                            success: function (response) {
+                                if (response.success) {
+                                    Swal.fire("Deleted!", "Selected photos have been deleted.", "success").then(() => {
+                                        selectedPhotos.forEach(function (photoID) {
+                                            $('.photo-card[data-photo-id="' + photoID + '"]').remove();
+                                        });
+                                        location.reload(); // Reload page after deletion
+                                    });
+                                } else {
+                                    Swal.fire("Error!", response.message, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error!", "Unable to delete the photos. Please try again.", "error");
+                            }
+                        });
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        Swal.fire("Cancelled", "Your photos are safe :)", "error");
+                    }
+                });
+            });
+
+            showPhotos();
+        });
+    </script>
+    <script>
+        var photos = [];
+        var currentIndex = 0;
+
+        $(document).ready(function () {
+            // Simpan daftar semua foto dalam array
+            $('.photo-item img').each(function (index) {
+                photos.push($(this).attr('src'));
+            });
+
+            // Klik gambar untuk menampilkan modal preview
+            $('.photo-item img').on('click', function () {
+                currentIndex = $('.photo-item img').index(this);
+                showImage(currentIndex);
+                $('#imagePreviewModal').modal('show');
+            });
+
+            // Fungsi untuk menampilkan gambar berdasarkan index
+            function showImage(index) {
+                $('#previewImage').attr('src', photos[index]);
+            }
+
+            // Next Image
+            $('#nextImage').on('click', function () {
+                if (currentIndex < photos.length - 1) {
+                    currentIndex++;
+                    showImage(currentIndex);
+                }
+            });
+
+            // Prev Image
+            $('#prevImage').on('click', function () {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    showImage(currentIndex);
+                }
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            // Handle submit form upload photo
+            $('#uploadPhotoForm').submit(function (event) {
+                event.preventDefault(); // Mencegah form refresh halaman
+
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: '@Url.Action("Create", "Photo", new {AlbumID = ViewBag.AlbumID})',  // Pastikan ini rute yang benar ke PhotoController
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire("Success!", "Photo uploaded successfully.", "success").then(() => {
+                                $('#addPhotoModal').modal('hide'); // Tutup modal
+                                location.reload(); // Refresh halaman
+                            });
+                        } else {
+                            Swal.fire("Error!", response.message, "error");
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("Error!", "Failed to upload photo.", "error");
+                    }
+                });
+            });
+        });
+
+        $(document).on("change", ".thumbnail-radio", function () {
+            var photoID = $(this).val();
+            var albumID = $(this).data("album-id");
+
+            $.ajax({
+                url: '/Photo/SetThumbnail',  // Sesuaikan dengan route controller-mu
+                type: 'POST',
+                data: { id: photoID, albumID: albumID },
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.message,
+                            timer: 6000,
+                            timerProgressBar: true,
+                            showConfirmButton: false
+                        });
+                        location.reload();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: "Failed to update thumbnail",
+                            showConfirmButton: true
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: "An error occurred while updating the thumbnail.",
+                        showConfirmButton: true
+                    });
+                }
+            });
+        });
+
+    </script>
+}

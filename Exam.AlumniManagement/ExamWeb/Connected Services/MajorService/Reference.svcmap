@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="547527a1-fd4e-427c-8615-30b67b382f6b" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:50219/Services/MajorService.svc" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="MajorService.xsd" MetadataType="Schema" ID="a5154312-0670-42d9-805f-d888a3e763f8" SourceId="1" SourceUrl="http://localhost:50219/Services/MajorService.svc?xsd=xsd2" />
+    <MetadataFile FileName="MajorService1.xsd" MetadataType="Schema" ID="e77050b1-3bda-4fc2-8ee7-5c346f1ae74d" SourceId="1" SourceUrl="http://localhost:50219/Services/MajorService.svc?xsd=xsd3" />
+    <MetadataFile FileName="MajorService2.xsd" MetadataType="Schema" ID="cdb62106-0b88-45de-9e76-715cdab58efd" SourceId="1" SourceUrl="http://localhost:50219/Services/MajorService.svc?xsd=xsd0" />
+    <MetadataFile FileName="MajorService3.xsd" MetadataType="Schema" ID="8f8d50ac-9594-4b86-acad-8b58d2bb4c18" SourceId="1" SourceUrl="http://localhost:50219/Services/MajorService.svc?xsd=xsd1" />
+    <MetadataFile FileName="MajorService.wsdl" MetadataType="Wsdl" ID="b23c0e7f-ed60-4ad9-ad71-117f9996e881" SourceId="1" SourceUrl="http://localhost:50219/Services/MajorService.svc?wsdl" />
+    <MetadataFile FileName="MajorService.disco" MetadataType="Disco" ID="b1bfa1f6-751d-408c-a6c2-3ee6eee1c0b6" SourceId="1" SourceUrl="http://localhost:50219/Services/MajorService.svc?disco" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

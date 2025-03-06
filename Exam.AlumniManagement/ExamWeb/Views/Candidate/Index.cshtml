@@ -1,0 +1,124 @@
+﻿@model IEnumerable<ExamWeb.Models.JobCandidateModel>
+
+@{
+    ViewBag.Title = "Candidates List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- DataTables & Styles -->
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        .dataTables_wrapper {
+            width: 100%;
+        }
+
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .download-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+            .download-btn:hover {
+                color: #0056b3;
+            }
+
+            .download-btn i {
+                font-size: 16px;
+            }
+    </style>
+}
+
+<h2 class="text-center my-4">Candidates for @ViewBag.JobTitle</h2>
+
+<div class="table-responsive">
+    <p>Description: @ViewBag.JobDescription</p>
+    <p>Min Experience: @ViewBag.MinExperience years</p>
+    <p>Required Skills: @string.Join(", ", ViewBag.SkillNames)</p>
+    <table id="candidatesTable" class="table table-striped table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>No.</th>
+                <th>Full Name</th>
+                <th>Attachments</th>
+                <th>Apply Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Select((value, index) => new { value, index }))
+            {
+                <tr>
+                    <td>@(item.index + 1)</td>
+                    <td>@Html.DisplayFor(modelItem => item.value.FullName)</td>
+                    <td>
+                        @if (item.value.JobAttachments != null && item.value.JobAttachments.Any())
+                        {
+                            foreach (var attachment in item.value.JobAttachments)
+                            {
+                                var filePath = attachment.FilePath?.Replace("~", "").Trim();
+                                if (!string.IsNullOrEmpty(filePath) && !filePath.Contains("/JobAttachments/"))
+                                {
+                                    filePath = filePath.Replace("JobAttachments", "JobAttachments/");
+                                }
+                                var fileName = attachment.FileName;
+                                var allName = $"{filePath}/{fileName}";
+
+                                <a href="@allName" download="@fileName" target="_blank" rel="noopener noreferrer" class="download-btn">
+                                    <i class="fas fa-download"></i> @attachment.AttachmentTypeDisplay
+                                </a>
+                                <br />
+                            }
+                        }
+                        else
+                        {
+                            <span>No Attachments</span>
+                        }
+                    </td>
+                    <td>@Html.DisplayFor(modelItem => item.value.ApplyDate)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- DataTables Scripts -->
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#candidatesTable').DataTable({
+                "paging": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "responsive": true,
+                "lengthMenu": [5, 10, 20, 50, 100],
+                "pageLength": 10,
+                "language": {
+                    "search": " Search:",
+                    "lengthMenu": "Show _MENU_ entries",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ candidates",
+                    "paginate": {
+                        "previous": "« Prev",
+                        "next": "Next »"
+                    }
+                }
+            });
+        });
+    </script>
+}

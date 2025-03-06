@@ -1,0 +1,212 @@
+﻿@model ExamWeb.Models.AspNetUserModel.RoleModel
+
+@{
+    ViewBag.Title = "Role Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.7/css/fixedHeader.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Styling agar tampilan lebih rapi */
+        .dataTables_wrapper {
+            width: 100%;
+        }
+
+            .dataTables_wrapper .dataTables_paginate {
+                float: none;
+                text-align: center;
+            }
+
+            .dataTables_wrapper .dataTables_info {
+                float: left;
+                padding-top: 0.755em;
+            }
+
+            .dataTables_wrapper .bottom {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+    </style>
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3 text-center text-primary">Role Management</h2>
+
+    <div class="d-flex justify-content mb-3">
+        <button type="button" class="btn btn-success btn-lg shadow" data-bs-toggle="modal" data-bs-target="#addRoleModal">
+            <i class="bi bi-plus-circle me-2"></i> Create Role
+        </button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="rolesData" style="width:100%">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>Actions</th>
+                    <th>No.</th>
+                    <th>Role Name</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                <!-- Populate table rows here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@*Create Modal*@
+<div class="modal fade" id="addRoleModal" tabindex="-1" aria-labelledby="addRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addRoleModalLabel">Add Role</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addRoleForm" method="post">
+                    <input type="hidden" id="addRoleId" name="addRoleId" />
+
+                    <div class="mb-3">
+                        <label for="addRoleName" class="form-label">Role Name</label>
+                        <input type="text" class="form-control" id="addRoleName" name="addRoleName" required />
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css">
+
+    <script>
+     $(document).ready(function () {
+         var table = $('#rolesData').DataTable({
+             "ajax": {
+                 "url": '@Url.Action("GetRoles", "Role")',
+                 "type": "GET",
+                 "datatype": "json"
+             },
+             "columns": [
+                 {
+                     "data": null,
+                     "render": function (data, type, row) {
+                         return `
+                             <div class="text-center">
+                                 <button class="btn btn-sm btn-danger deleteButton" data-id="${row.Id}" title="Delete">
+                                     <i class="fas fa-trash"></i>
+                                 </button>
+                             </div>`;
+                     }
+                 },
+                 {
+                     "data": null,
+                     "render": function (data, type, row, meta) {
+                         return meta.row + 1;
+                     }
+                 },
+                 { "data": "Name" },
+             ],
+             "dom": '<"top"f>rt<"bottom"lpi><"clear">',
+             "pagingType": "full_numbers",
+             "pageLength": 10,
+             "lengthMenu": [5, 10, 20, 30, 100],
+             "scrollY": "400px",
+             "scrollX": true,
+             "scrollCollapse": true,
+             "fixedHeader": true
+         });
+
+         $('#rolesData_filter input').unbind();
+         $('#rolesData_filter input').on('keyup', function (e) {
+             var value = $(this).val();
+             if (value.length >= 3 || value.length === 0) {
+                 table.search(value).draw();
+             }
+         });
+
+         // Handle Delete Button
+         $('#rolesData').on('click', '.deleteButton', function () {
+             var roleId = $(this).data('id');
+
+             Swal.fire({
+                 title: "Are you sure?",
+                 text: "You won't be able to revert this!",
+                 icon: "warning",
+                 showCancelButton: true,
+                 confirmButtonColor: "#d33",
+                 cancelButtonColor: "#3085d6",
+                 confirmButtonText: "Yes, delete it!"
+             }).then((result) => {
+                 if (result.isConfirmed) {
+                     $.ajax({
+                         url: '@Url.Action("Delete", "Role")',
+                         type: "POST",
+                         data: { id: roleId },
+                         success: function () {
+                             Swal.fire("Deleted!", "Role has been deleted.", "success");
+                             table.ajax.reload();
+                         },
+                         error: function () {
+                             Swal.fire("Error!", "Failed to delete role.", "error");
+                         }
+                     });
+                 }
+             });
+         });
+    });
+        $(document).ready(function () {
+            $('#addRoleForm').submit(function (e) {
+                e.preventDefault();
+
+                var roleName = $('#addRoleName').val();
+
+                $.ajax({
+                    url: '/Role/Create', // Sesuaikan dengan endpoint backend
+                    type: 'POST',
+                    data: { Name: roleName },
+                    success: function (response) {
+                        if (response.success) {
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: "Role Created succesfully",
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                            $('#addRoleModal').modal('hide');
+                            $('#addRoleForm')[0].reset();
+                            $('#rolesData').DataTable().ajax.reload();
+                        } else {
+                            Swal.fire("Error!", response.message, "error");
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("Error!", "Failed to add role.", "error");
+                    }
+                });
+            });
+        });
+
+    </script>
+
+}

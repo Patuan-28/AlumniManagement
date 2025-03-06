@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://tempuri.org/" elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:50219/Services/AlumniImageService.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/ExamWCF.DTOs" />
+  <xs:element name="GetAllImages">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="alumniID" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetAllImagesResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/ExamWCF.DTOs" minOccurs="0" name="GetAllImagesResult" nillable="true" type="q1:ArrayOfAlumniImageDTO" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetImageByID">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="imageID" type="xs:int" />
+        <xs:element minOccurs="0" name="alumniID" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetImageByIDResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/ExamWCF.DTOs" minOccurs="0" name="GetImageByIDResult" nillable="true" type="q2:AlumniImageDTO" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteImageByID">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="imageID" type="xs:int" />
+        <xs:element minOccurs="0" name="alumniID" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DeleteImageByIDResponse">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="AddImage">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/ExamWCF.DTOs" minOccurs="0" name="alumniImages" nillable="true" type="q3:ArrayOfAlumniImageDTO" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="AddImageResponse">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

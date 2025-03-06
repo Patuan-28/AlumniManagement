@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/ExamWCF.DTOs" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/ExamWCF.DTOs" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:50219/Services/AlumniService.svc?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/System.Web.Mvc" />
+  <xs:import schemaLocation="http://localhost:50219/Services/AlumniService.svc?xsd=xsd4" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:complexType name="ArrayOfAlumniDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="AlumniDTO" nillable="true" type="tns:AlumniDTO" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfAlumniDTO" nillable="true" type="tns:ArrayOfAlumniDTO" />
+  <xs:complexType name="AlumniDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Address" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="AlumniID" type="xs:int" />
+      <xs:element minOccurs="0" name="ApplyDate" nillable="true" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="Attachments" nillable="true" type="tns:ArrayOfAttachmentDTO" />
+      <xs:element minOccurs="0" name="DateOfBirth" nillable="true" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="Degree" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="DistrictID" nillable="true" type="xs:int" />
+      <xs:element minOccurs="0" name="DistrictNames" nillable="true" type="xs:string" />
+      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/System.Web.Mvc" minOccurs="0" name="Districts" nillable="true" type="q1:ArrayOfSelectListItem" />
+      <xs:element minOccurs="0" name="Email" nillable="true" type="xs:string" />
+      <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/System.Web.Mvc" minOccurs="0" name="Faculties" nillable="true" type="q2:ArrayOfSelectListItem" />
+      <xs:element minOccurs="0" name="FacultyID" type="xs:int" />
+      <xs:element minOccurs="0" name="FacultyMajorNames" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FacultyNames" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FirstName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FullAddresses" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FullNames" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Gender" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="GraduationYear" nillable="true" type="xs:int" />
+      <xs:element minOccurs="0" name="HobbyDisplay" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="LastName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="LinkedInProfile" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="MajorID" nillable="true" type="xs:int" />
+      <xs:element minOccurs="0" name="MajorNames" nillable="true" type="xs:string" />
+      <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/System.Web.Mvc" minOccurs="0" name="Majors" nillable="true" type="q3:ArrayOfSelectListItem" />
+      <xs:element minOccurs="0" name="MiddleName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="MobileNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ModifiedDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="PhotoName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="PhotoPath" nillable="true" type="xs:string" />
+      <xs:element xmlns:q4="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="SelectedHobbies" nillable="true" type="q4:ArrayOfint" />
+      <xs:element minOccurs="0" name="StateID" type="xs:int" />
+      <xs:element minOccurs="0" name="StateNames" nillable="true" type="xs:string" />
+      <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/System.Web.Mvc" minOccurs="0" name="States" nillable="true" type="q5:ArrayOfSelectListItem" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="AlumniDTO" nillable="true" type="tns:AlumniDTO" />
+  <xs:complexType name="ArrayOfAttachmentDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="AttachmentDTO" nillable="true" type="tns:AttachmentDTO" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfAttachmentDTO" nillable="true" type="tns:ArrayOfAttachmentDTO" />
+  <xs:complexType name="AttachmentDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="FileName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FilePath" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="AttachmentDTO" nillable="true" type="tns:AttachmentDTO" />
+  <xs:complexType name="ArrayOfDistrictDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="DistrictDTO" nillable="true" type="tns:DistrictDTO" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfDistrictDTO" nillable="true" type="tns:ArrayOfDistrictDTO" />
+  <xs:complexType name="DistrictDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="DistrictID" type="xs:int" />
+      <xs:element minOccurs="0" name="DistrictName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="StateID" type="xs:int" />
+      <xs:element minOccurs="0" name="StateNames" nillable="true" type="xs:string" />
+      <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/System.Web.Mvc" minOccurs="0" name="States" nillable="true" type="q6:ArrayOfSelectListItem" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="DistrictDTO" nillable="true" type="tns:DistrictDTO" />
+  <xs:complexType name="ArrayOfStateDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="StateDTO" nillable="true" type="tns:StateDTO" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfStateDTO" nillable="true" type="tns:ArrayOfStateDTO" />
+  <xs:complexType name="StateDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="StateID" type="xs:int" />
+      <xs:element minOccurs="0" name="StateName" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="StateDTO" nillable="true" type="tns:StateDTO" />
+  <xs:complexType name="ArrayOfHobbyDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="HobbyDTO" nillable="true" type="tns:HobbyDTO" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfHobbyDTO" nillable="true" type="tns:ArrayOfHobbyDTO" />
+  <xs:complexType name="HobbyDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="HobbyID" type="xs:int" />
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="HobbyDTO" nillable="true" type="tns:HobbyDTO" />
+</xs:schema>

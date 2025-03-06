@@ -1,0 +1,326 @@
+﻿@model ExamWeb.Models.AspNetUserModel.UserModel
+
+@{
+    ViewBag.Title = "User Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.7/css/fixedHeader.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Styling agar tampilan lebih rapi */
+        .dataTables_wrapper {
+            width: 100%;
+        }
+
+            .dataTables_wrapper .dataTables_paginate {
+                float: none;
+                text-align: center;
+            }
+
+            .dataTables_wrapper .dataTables_info {
+                float: left;
+                padding-top: 0.755em;
+            }
+
+            .dataTables_wrapper .bottom {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+    </style>
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3 text-center text-info">User Management</h2>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered" id="usersData" style="width:100%">
+            <thead class="table-info text-center">
+                <tr>
+                    <th>Actions</th>
+                    <th>No.</th>
+                    <th>Full Name</th>
+                    @*<th>Role</th>*@
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody class="text-center">
+                <!-- Populate table rows here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@*---------------------------------Edit User Modal---------------------------------*@
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId" name="editUserId" />
+
+                    <div class="form-group mb-3">
+                        <label for="editFullName" class="form-label">Full Name</label>
+                        <input type="text" class="form-control shadow-sm" id="editFullName" name="editFullName" required />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="editUserRole" class="form-label">Roles</label>
+                        <select class="form-control shadow-sm" id="editUserRole" name="editUserRole" multiple="multiple"></select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css">
+
+    <script>
+        $(document).ready(function () {
+            var table = $('#usersData').DataTable({
+                "ajax": {
+                    "url": '@Url.Action("GetUsers", "User")',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return `
+                                <div class="text-center">
+                                    <button class="btn btn-sm btn-primary editButton" data-id="${row.Id}" data-name="${row.FullName}" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger deleteButton" data-id="${row.Id}" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>`;
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + 1;
+                        }
+                    },
+                    { "data": "FullName" },
+                    //{ "data": "Name" },
+                    { "data": "Email" }
+                ],
+                "dom": '<"top"f>rt<"bottom"lpi><"clear">',
+                "pagingType": "full_numbers",
+                "pageLength": 10,
+                "lengthMenu": [5, 10, 20, 30, 100],
+                "scrollY": "400px",
+                "scrollX": true,
+                "scrollCollapse": true,
+                "fixedHeader": true
+            });
+
+            $('#usersData_filter input').unbind();
+            $('#usersData_filter input').on('keyup', function (e) {
+                var value = $(this).val();
+                if (value.length >= 3 || value.length === 0) {
+                    table.search(value).draw();
+                }
+            });
+
+            // Handle Delete Button
+            $('#usersData').on('click', '.deleteButton', function () {
+                var userId = $(this).data('id');
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("DeleteUser", "User")',
+                            type: "POST",
+                            data: { id: userId },
+                            success: function () {
+                                Swal.fire("Deleted!", "User has been deleted.", "success");
+                                table.ajax.reload();
+                            },
+                            error: function () {
+                                Swal.fire("Error!", "Failed to delete user.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Handle Edit Button (Populate Modal)
+            $('#usersData').on('click', '.editButton', function () {
+                var userId = $(this).data('id');
+
+                $.ajax({
+                    url: '/User/GetUserID',
+                    type: 'GET',
+                    data: { id: userId },
+                    success: function (response) {
+                        if (response.user) {
+                            $('#editUserId').val(response.user.Id);
+                            $('#editFullName').val(response.user.FullName);
+
+                            // Populate roles dropdown
+                            var roleDropdown = $('#editUserRole');
+                            roleDropdown.empty(); // Hapus isi sebelumnya
+
+                            // Log role untuk debugging
+                            console.log("Available Roles:", response.roles);
+
+                            // Loop melalui semua role dan tambahkan ke dropdown
+                            response.roles.forEach(function (role) {
+                                var isSelected = response.user.SelectedRole.includes(role.Id) ? 'selected' : '';
+                                roleDropdown.append(`<option value="${role.Id}" ${isSelected}>${role.Name}</option>`);
+                            });
+
+                            // Reinitialize Select2
+                            roleDropdown.select2({
+                                width: '100%',
+                                placeholder: "Select roles",
+                                allowClear: true
+                            });
+
+                            $('#editUserModal').modal('show');
+                        }
+                    },
+                    error: function () {
+                        Swal.fire("Error!", "Failed to fetch user data.", "error");
+                    }
+                });
+            });
+
+
+
+            // Handle Form Submission (Update User)
+            $('#editUserForm').submit(function (e) {
+                e.preventDefault();
+                var userId = $('#editUserId').val();
+                var fullName = $('#editFullName').val();
+
+                $.ajax({
+                    url: '@Url.Action("UpdateFullName", "User")',
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ Id: userId, FullName: fullName }),
+                    success: function (response) {
+                        Swal.fire("Success!", "User name updated successfully.", "success");
+                        $('#editUserModal').modal('hide');
+                        table.ajax.reload();
+                    },
+                    error: function () {
+                        Swal.fire("Error!", "Failed to update user.", "error");
+                    }
+                });
+            });
+
+            // Handle Delete Button
+            $('#usersData').on('click', '.deleteButton', function () {
+                var userId = $(this).data('id');
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/User/Delete',
+                            type: "POST",
+                            data: { id: userId },
+                            success: function () {
+                                Swal.fire("Deleted!", "User has been deleted.", "success");
+                                table.ajax.reload();
+                            },
+                            error: function () {
+                                Swal.fire("Error!", "Failed to delete user.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $(".select2").select2({
+                width: '100%',
+                placeholder: "Select roles"
+            });
+
+            // Function untuk memuat data user dan role
+            function loadUserData(userId) {
+                $.ajax({
+                    url: '@Url.Action("GetUserID", "User")',
+                    type: "GET",
+                    data: { id: userId },
+                    success: function (response) {
+                        $("#editUserId").val(response.user.Id);
+                        $("#editFullName").val(response.user.FullName);
+
+                        // Bersihkan dropdown sebelum mengisi ulang
+                        $("#editUserRole").empty();
+
+                        // Tambahkan semua role ke dropdown
+                        $.each(response.roles, function (index, role) {
+                            var isSelected = response.user.SelectedRole.includes(role.Id) ? "selected" : "";
+                            $("#editUserRole").append(`<option value="${role.Id}" ${isSelected}>${role.Name}</option>`);
+                        });
+
+                        // Refresh Select2 setelah update
+                        $("#editUserRole").trigger("change");
+
+                        // Tampilkan modal
+                        $("#editUserModal").modal("show");
+                    },
+                    error: function () {
+                        alert("Failed to load user data");
+                    }
+                });
+            }
+
+            // Event listener untuk tombol edit
+            $(".editButton").on("click", function () {
+                var userId = $(this).data("id");
+                loadUserData(userId);
+            });
+        });
+    </script>
+}

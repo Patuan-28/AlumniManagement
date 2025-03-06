@@ -1,0 +1,819 @@
+﻿@model ExamWeb.Models.JobPostingModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.7/css/fixedHeader.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .dataTables_wrapper {
+            width: 100%;
+        }
+
+            .dataTables_wrapper .dataTables_paginate {
+                float: none;
+                text-align: center;
+            }
+
+            .dataTables_wrapper .dataTables_info {
+                float: left;
+                padding-top: 0.755em;
+            }
+
+            .dataTables_wrapper .bottom {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+    </style>
+}
+
+<h2>Job Posting</h2>
+
+<button id="createButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+    Add New
+</button>
+
+<table class="table" id="jpData" style="width:100%">
+    <thead>
+        <tr>
+            <th>Actions</th>
+            <th>No.</th>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.JobDescription)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Candidates)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsActive)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsClosed)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifiedDate)
+            </th>
+        </tr>
+    </thead>
+</table>
+
+@*Create modal*@
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createModalLabel">Create New Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @using (Html.BeginForm("UpsertJobPosting", "JobPosting", FormMethod.Post, new { id = "createForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.Company, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Company, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Company, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.EmploymentTypeID, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.DropDownListFor(model => model.EmploymentTypeID, (IEnumerable<SelectListItem>)ViewBag.EmploymentTypeList, "Select Employment Type", new { @class = "form-control", id = "EmploymentTypeDropdown" })
+                                @Html.ValidationMessageFor(model => model.EmploymentTypeID, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.MinimumExperience, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.MinimumExperience, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.MinimumExperience, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            Description
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.JobDescription, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.JobDescription, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            Skill
+                            <div class="col-md-10">
+                                @Html.ListBoxFor(model => model.SelectedSkills, (MultiSelectList)ViewBag.SkillsList, new { @class = "form-control", id = "ddlSkill", multiple = "multiple" })
+                                @Html.ValidationMessageFor(model => model.SelectedSkills, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            <label>Attachments</label>
+                            <div class="col-md-10">
+                                @if (ViewBag.AttachmentsList != null)
+                                {
+                                    foreach (var attachment in ViewBag.AttachmentsList as List<SelectListItem>)
+                                    {
+                                        <div class="form-check">
+                                            <input type="checkbox"
+                                                   name="SelectedAttachmentTypes"
+                                                   value="@attachment.Value"
+                                                   id="attachment_@attachment.Value"
+                                                   class="form-check-input"
+                                                   @(Model != null && Model.SelectedAttachmentTypes != null && Model.SelectedAttachmentTypes.Contains(Convert.ToInt32(attachment.Value)) ? "checked" : "") />
+                                            <label class="form-check-label" for="attachment_@attachment.Value">@attachment.Text</label>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <p>No attachments available.</p>
+                                }
+                                @Html.ValidationMessageFor(model => model.SelectedAttachmentTypes, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                <div class="form-check form-switch">
+                                    @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-check-input", id = "isActiveSwitch" })
+                                    <label class="form-check-label" for="isActiveSwitch">
+                                        @(Model != null && Model.IsActive ? "Active" : "Inactive")
+                                    </label>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.IsActive, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.IsClosed, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                <div class="form-check form-switch">
+                                    @Html.CheckBoxFor(model => model.IsClosedValue, new { @class = "form-check-input", id = "isClosedSwitch" })
+                                    <label class="form-check-label" for="isClosedSwitch">
+                                        @(Model != null && Model.IsClosed.GetValueOrDefault() ? "Closed" : "Not Yet")
+                                    </label>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.IsClosed, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Create</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@*Edit modal*@
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @using (Html.BeginForm("UpsertJobPosting", "JobPosting", FormMethod.Post, new { id = "editForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        @* Hidden field for JobID *@
+                        @Html.HiddenFor(model => model.JobID, new { id = "JobID" })
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control", id = "Title" } })
+                                @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.Company, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Company, new { htmlAttributes = new { @class = "form-control", id = "Company" } })
+                                @Html.ValidationMessageFor(model => model.Company, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.EmploymentTypeID, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.DropDownListFor(model => model.EmploymentTypeID, (IEnumerable<SelectListItem>)ViewBag.EmploymentTypeList, "Select Employment Type", new { @class = "form-control", id = "EditEmploymentTypeDropdown" })
+                                @Html.ValidationMessageFor(model => model.EmploymentTypeID, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.MinimumExperience, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.MinimumExperience, new { htmlAttributes = new { @class = "form-control", id = "MinimumExperience" } })
+                                @Html.ValidationMessageFor(model => model.MinimumExperience, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            <label>Description</label>
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.JobDescription, new { htmlAttributes = new { @class = "form-control", id = "JobDescription" } })
+                                @Html.ValidationMessageFor(model => model.JobDescription, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            <label>Skill</label>
+                            <div class="col-md-10">
+                                @Html.ListBoxFor(model => model.SelectedSkills, (MultiSelectList)ViewBag.SkillsList, new { @class = "form-control", id = "editDdlSkill", multiple = "multiple" })
+                                @Html.ValidationMessageFor(model => model.SelectedSkills, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            <label>Attachments</label>
+                            <div class="col-md-10">
+                                @if (ViewBag.AttachmentsList != null)
+                                {
+                                    foreach (var attachment in ViewBag.AttachmentsList as List<SelectListItem>)
+                                    {
+                                        <div class="form-check">
+                                            <input type="checkbox"
+                                                   name="SelectedAttachmentTypes"
+                                                   value="@attachment.Value"
+                                                   id="edit_attachment_@attachment.Value"
+                                                   class="form-check-input"
+                                                   @(Model != null && Model.SelectedAttachmentTypes != null && Model.SelectedAttachmentTypes.Contains(Convert.ToInt32(attachment.Value)) ? "checked" : "") />
+                                            <label class="form-check-label" for="edit_attachment_@attachment.Value">@attachment.Text</label>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <p>No attachments available.</p>
+                                }
+                                @Html.ValidationMessageFor(model => model.SelectedAttachmentTypes, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.IsActive, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                <div class="form-check form-switch">
+                                    @Html.CheckBoxFor(model => model.IsActive, new { @class = "form-check-input", id = "editIsActiveSwitch" })
+                                    <label class="form-check-label" for="editIsActiveSwitch">
+                                        @(Model != null && Model.IsActive ? "Active" : "Inactive")
+                                    </label>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.IsActive, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.IsClosed, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                <div class="form-check form-switch">
+                                    @Html.CheckBoxFor(model => model.IsClosedValue, new { @class = "form-check-input", id = "editIsClosedSwitch" })
+                                    <label class="form-check-label" for="editIsClosedSwitch">
+                                        @(Model != null && Model.IsClosed.GetValueOrDefault() ? "Closed" : "Not Yet")
+                                    </label>
+                                </div>
+                                @Html.ValidationMessageFor(model => model.IsClosed, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@* Apply to Job Modal *@
+<div id="applyJobModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="applyJobModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="applyJobModalLabel">Apply to Job</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            @using (Html.BeginForm("ApplyToJob", "JobPosting", FormMethod.Post, new { id = "applyJobForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    @* Hidden field for JobID *@
+                    @Html.HiddenFor(model => model.JobID, new { id = "JobID" })
+
+                    <div><strong>Job Title:</strong> <span id="JobTitle"></span></div>
+                    <div><strong>Job Description:</strong> <span id="JobDescription"></span></div>
+                    <div><strong>Min. Experience:</strong> <span id="MinExperience"></span> years</div>
+                    <div><strong>Skills:</strong> <span id="Skills"></span></div>
+
+                    @* Alumni Dropdown *@
+                    <div class="form-group">
+                        <label for="AlumniDropdown">Alumni</label>
+                        <select id="AlumniDropdown" name="AlumniID" class="form-control select2">
+                            <option value="">Select Alumni</option>
+                        </select>
+                    </div>
+
+                    @* Dynamic File Uploads *@
+                    <div id="attachmentFields"></div>
+                </div>
+
+                @* Modal Footer *@
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Submit Application</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+
+
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var table = $('#jpData').DataTable({
+                "ajax": {
+                    "url": "@Url.Action("GetJobPostings", "JobPosting")",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                     @*{
+                         "data": null,
+                         "render": function (data, type, row) {
+                             var createApplyJobLink = '@Url.Action("CreateApplyJob", "JobPosting", new { jobId = "PLACEHOLDER" })'.replace("PLACEHOLDER", row.JobID);
+                             var candidatesLink = '@Url.Action("Index", "Candidate", new { jobId = "PLACEHOLDER" })'.replace("PLACEHOLDER", row.JobID);
+
+                             return `
+                                 <div style="display: flex; gap: 5px; align-items: center;">
+                                     <button class="btn btn-warning editButton" data-id="${row.JobID}" title="Edit">
+                                         <i class="fas fa-edit"></i>
+                                     </button>
+                                     <a href="${createApplyJobLink}" class="btn btn-success" title="Apply Job">
+                                         <i class="fas fa-paper-plane"></i>
+                                     </a>
+                                     <a href="${candidatesLink}" class="btn btn-info" title="Candidates">
+                                         <i class="fas fa-users"></i>
+                                     </a>
+                                     <button class="btn btn-danger deleteButton" data-id="${row.JobID}" title="Delete">
+                                         <i class="fas fa-trash-alt"></i>
+                                     </button>
+                                 </div>
+                             `;
+                         }
+                     },*@
+                     {
+                         "data": null,
+                         "render": function (data, type, row) {
+                             var createApplyJobLink = '@Url.Action("CreateApplyJob", "JobPosting", new { jobId = "PLACEHOLDER" })'.replace("PLACEHOLDER", row.JobID);
+                             var candidatesLink = '@Url.Action("Index", "Candidate", new { jobId = "PLACEHOLDER" })'.replace("PLACEHOLDER", row.JobID);
+
+                             var buttons = `
+                                 <a href="${candidatesLink}" class="btn btn-info" title="Candidates">
+                                     <i class="fas fa-users"></i>
+                                 </a>
+                             `;
+
+                             // Kalo dia Active (IsClosed = false)
+                             if (!row.IsClosed) {
+                                 buttons += `
+                                     <button class="btn btn-warning editButton" data-id="${row.JobID}" title="Edit">
+                                         <i class="fas fa-edit"></i>
+                                     </button>
+                                    <a href="javascript:void(0);" class="btn btn-success atjButton" title="Apply Job" data-id="${row.JobID}">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </a>
+                                     <button class="btn btn-danger deleteButton" data-id="${row.JobID}" title="Delete">
+                                         <i class="fas fa-trash-alt"></i>
+                                     </button>
+                                 `;
+                             }
+
+                             return `<div style="display: flex; gap: 5px; align-items: center;">${buttons}</div>`;
+                         }
+                     },
+                    {
+                        "data": null,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + 1;
+                        }
+                    },
+                    { "data": "Title" },
+                    { "data": "JobDescription" },
+                    { "data": "Candidates" },
+                    {
+                        "data": "IsActive",
+                        "render": function (data, type, row) {
+                            return data ? "Active" : "Inactive";
+                        }
+                    },
+                    {
+                        "data": "IsClosed",
+                        "render": function (data, type, row) {
+                            return data ? "Closed" : "Not Yet";
+                        }
+                    },
+                    {
+                        "data": "ModifiedDate",
+                        "render": function (data, type, row) {
+                            return moment(data).format('DD-MMM-YYYY hh:mm:ss A');
+                        }
+                    },
+                ],
+                "dom": '<"top"f>rt<"bottom"lpi><"clear">',
+                "pagingType": "full_numbers",
+                "pageLength": 10,
+                "lengthMenu": [5, 10, 20, 30, 100],
+                "scrollY": "400px",
+                "scrollX": true,
+                "scrollCollapse": true,
+                "fixedHeader": true,
+                "language": {
+                    "paginate": {
+                        "previous": "Previous",
+                        "next": "Next",
+                        "first": "<<",
+                        "last": ">>"
+                    }
+                }
+            });
+
+            $('#jpData_filter input').unbind();
+            $('#jpData_filter input').on('keyup', function (e) {
+                var value = $(this).val();
+                if (value.length >= 3 || value.length === 0) {
+                    table.search(value).draw();
+                }
+            });
+
+            $(document).on('click', '.deleteButton', function () {
+                const itemId = $(this).data('id');
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Once deleted, you will not be able to recover this item!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete it!",
+                    cancelButtonText: "Cancel",
+                    dangerMode: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/JobPosting/Delete',
+                            type: 'POST',
+                            data: { id: itemId },
+                            success: function (response) {
+                                if (response.success) {
+                                    Swal.fire("Deleted!", response.message, "success").then(() => {
+                                        table.ajax.reload();
+                                    });
+                                } else {
+                                    Swal.fire("Error!", response.message, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error!", "Unable to delete the item. Please try again.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+
+            $(document).ready(function () {
+                $('.select2').select2({
+                    placeholder: "Select Alumni",
+                    allowClear: true
+                });
+            });
+
+            $(document).on('click', '.atjButton', function () {
+                var jobID = $(this).data('id'); // Ensure atjButton has a valid data-id
+                console.log("Fetching job details for JobID:", jobID); // Debugging
+
+                // Make an AJAX request to get the details for the selected job posting
+                $.ajax({
+                    url: '/JobPosting/GetJobDetails/',
+                    type: 'GET',
+                    data: { jobID: jobID },
+                    dataType: 'json',
+                    beforeSend: function () {
+                        $("#applyJobModal .modal-body").css("opacity", "0.5");
+                    },
+                    success: function (response) {
+                        console.log("AJAX Response:", response); // Debugging
+
+                        if (response.success) {
+                            if (!response.jobDetails) {
+                                alert("Error: Job details not found.");
+                                return;
+                            }
+
+                            // Populate modal fields
+                            $('#applyJobModal #JobID').val(response.jobDetails.JobID);
+                            $('#applyJobModal #JobTitle').text(response.jobDetails.Title);
+                            $('#applyJobModal #JobDescription').text(response.jobDetails.JobDescription);
+                            $('#applyJobModal #MinExperience').text(response.jobDetails.MinimumExperience);
+                            $('#applyJobModal #Skills').text(response.jobDetails.SkillDisplay);
+
+                            // Populate alumni dropdown
+                            var alumniDropdown = $('#applyJobModal #AlumniDropdown');
+                            alumniDropdown.empty().append('<option value="">Select Alumni</option>');
+
+                            if (response.alumnis && Array.isArray(response.alumnis)) {
+                                $.each(response.alumnis, function (index, alumni) {
+                                    alumniDropdown.append(
+                                        $('<option></option>')
+                                            .attr('value', alumni.AlumniID)
+                                            .text(alumni.FullName)
+                                    );
+                                });
+                            } else {
+                                console.warn("No alumni data found.");
+                            }
+
+                            // Initialize Select2 inside the modal
+                            alumniDropdown.select2({
+                                dropdownParent: $("#applyJobModal"),
+                                placeholder: 'Select Alumni',
+                                allowClear: true
+                            });
+
+                            // Populate file upload fields dynamically
+                            if (response.requiredAttachments && Array.isArray(response.requiredAttachments)) {
+                                var attachmentFields = $("#attachmentFields");
+                                attachmentFields.empty(); // Clear old fields before adding new ones
+
+                                console.log("Total attachments received:", response.requiredAttachments.length);
+
+                                $.each(response.requiredAttachments, function (index, attachment) {
+                                    console.log(`Processing attachment ${index}: ID=${attachment.AttachmentTypeID}, Name=${attachment.Name}`);
+
+                                    var fileInputHTML = `
+                                    <div class="form-group">
+                                        <label for="attachment_${attachment.AttachmentTypeID}">${attachment.Name}</label>
+                                        <input type="file" id="attachment_${attachment.AttachmentTypeID}" name="attachments" class="form-control attachment-file" required />
+                                        <input type="hidden" name="AttachmentTypeIDs" value="${attachment.AttachmentTypeID}" />
+                                    </div>
+                                    `;
+
+                                    attachmentFields.append(fileInputHTML);
+                                });
+
+                                console.log("Final HTML inside #attachmentField:", attachmentFields.html());
+                            } else {
+                                console.warn("No required attachments found.");
+                            }
+
+
+
+                            // Remove loading indicator and show modal
+                            $("#applyJobModal .modal-body").css("opacity", "1");
+                            $("#applyJobModal").modal("show");
+                        } else {
+                            alert("Error loading job details.");
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        alert("Error fetching job details.");
+                    }
+                });
+            });
+
+            // Handling the form submission with file data
+            $('#applyJobForm').submit(function (e) {
+                e.preventDefault(); // Prevent default form submission
+
+                var formData = new FormData(this); // Collect form data including file inputs
+
+                $.ajax({
+                    url: '/JobPosting/ApplyToJob', // POST request to apply for the job
+                    type: 'POST',
+                    data: formData,
+                    processData: false, // Prevent jQuery from trying to process the data
+                    contentType: false, // Prevent jQuery from setting content-type (needed for file upload)
+                    beforeSend: function () {
+                        $("#applyJobModal .modal-body").css("opacity", "0.5");
+                    },
+                    success: function (response) {
+                        console.log("Application Response:", response); // Debugging
+
+                        if (response.success) {                            
+                            $('#applyJobModal').modal('hide'); // Close the modal
+                            $('#jpData').DataTable().ajax.reload(); // Reload the DataTable
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: "Job Applied Successfully",
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.errorMsg,
+                                showConfirmButton: true // Show OK button
+                            });
+                        }
+
+                        // Remove loading indicator and close modal
+                        $("#applyJobModal .modal-body").css("opacity", "1");
+                        $("#applyJobModal").modal("hide");
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        alert("Error submitting application.");
+                    }
+                });
+            });
+
+
+            //Inisiasi Select2 Dropdown
+            $('#createModal').on('shown.bs.modal', function () {
+                $('#createModal #ddlSkill').select2({
+                    placeholder: 'Select Skill',
+                    allowClear: true,
+                    dropdownParent: $('#createModal')
+                });
+            });
+
+            $('#editModal').on('shown.bs.modal', function () {
+                $('#editModal #editDdlSkill').select2({
+                    placeholder: 'Select Skill',
+                    allowClear: true,
+                    dropdownParent: $('#editModal')
+                });
+            });
+
+            //Create form JS
+            $('#createForm').submit(function (e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: $(this).attr('action'), // Form action URL
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            $('#createModal').modal('hide'); // Close modal
+                            $('#createForm')[0].reset();
+                            $('#jpData').DataTable().ajax.reload(); // Reload DataTable
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: "Job posting added succesfully",
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.errorMsg,
+                                showConfirmButton: true // Show OK button
+                            });
+
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        alert('An error occurred while saving.');
+                    }
+                });
+            });
+
+            //Edit form JS
+            $(document).on('click', '.editButton', function () {
+                var jobPostingID = $(this).data('id'); // CHANGE VARIABLE NAME
+                // Make an AJAX request to get the data for the selected ProductCategory
+                $.ajax({
+                    url: '/JobPosting/GetJobPostingID/', // CHANGE THE URL
+                    type: 'GET',
+                    data: { jobPostingID: jobPostingID }, // Send as query param
+                    dataType: 'json',
+                    success: function (response) {
+                        // Populate the form fields with the data returned from the server // CHANGE THE CONTENTS
+                        $('#editModal #JobID').val(response.JobID); // Assuming you have a hidden field for ID
+                        $('#editModal #Title').val(response.Title);
+                        $('#editModal #Company').val(response.Company);
+                        $('#editModal #JobDescription').val(response.JobDescription);
+                        $('#EditEmploymentTypeDropdown').val(response.EmploymentTypeID);
+                        $('#editModal #MinimumExperience').val(response.MinimumExperience);
+
+                        $('#editIsActiveSwitch').prop('checked', response.IsActive);
+                        $('#editIsClosedSwitch').prop('checked', response.IsClosedValue);
+
+                        $('#editDdlSkill').val(response.SelectedSkills).trigger('change');
+
+                        $('input[name="SelectedAttachmentTypes"]').prop('checked', false);
+                        if (response.SelectedAttachmentTypes) {
+                            response.SelectedAttachmentTypes.forEach(function (typeId) {
+                                $('#edit_attachment_' + typeId).prop('checked', true);
+                            });
+                        }
+
+                        // Show the Edit Modal
+                        $('#editModal').modal('show');
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        alert('An error occurred while fetching data.');
+                    }
+                });
+            });
+
+            $('#editForm').submit(function (e) {
+                e.preventDefault();
+
+                var formData = new FormData(this); // Use FormData for file uploads
+
+                $.ajax({
+                    url: $(this).attr('action'), // Form action URL
+                    type: 'POST',
+                    data: formData,
+                    processData: false, // Prevent jQuery from processing data
+                    contentType: false, // Ensure correct content type for file upload
+                    success: function (response) {
+                        if (response.success) {
+                            $('#editModal').modal('hide'); // Close the modal
+                            $('#editForm')[0].reset(); // Reset the form
+                            $('#jpData').DataTable().ajax.reload(); // Reload DataTable
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: "Edit Job Posting Successful",
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.errorMsg,
+                                showConfirmButton: true
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        alert('An error occurred while saving.');
+                    }
+                });
+            });
+        });
+    </script>
+}

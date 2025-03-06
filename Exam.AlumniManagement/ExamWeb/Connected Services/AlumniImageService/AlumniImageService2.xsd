@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/ExamWCF.DTOs" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/ExamWCF.DTOs" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:50219/Services/AlumniImageService.svc?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/System.Data.Linq" />
+  <xs:complexType name="ArrayOfAlumniImageDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="AlumniImageDTO" nillable="true" type="tns:AlumniImageDTO" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfAlumniImageDTO" nillable="true" type="tns:ArrayOfAlumniImageDTO" />
+  <xs:complexType name="AlumniImageDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="AlumniID" type="xs:int" />
+      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/System.Data.Linq" minOccurs="0" name="Alumnis" type="q1:EntityRefOfAlumniDi3362D5" />
+      <xs:element minOccurs="0" name="FileName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ImageID" type="xs:int" />
+      <xs:element minOccurs="0" name="ImagePath" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="UploadDate" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="AlumniImageDTO" nillable="true" type="tns:AlumniImageDTO" />
+</xs:schema>

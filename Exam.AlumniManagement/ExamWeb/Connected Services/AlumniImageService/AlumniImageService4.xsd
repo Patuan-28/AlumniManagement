@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/ExamWCF.Entities" xmlns:ser="http://schemas.microsoft.com/2003/10/Serialization/" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/ExamWCF.Entities" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:50219/Services/AlumniImageService.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+  <xs:complexType name="Alumni">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Address" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="AlumniHobbies" nillable="true" type="tns:ArrayOfAlumniHobby" />
+      <xs:element minOccurs="0" name="AlumniID" type="xs:int" />
+      <xs:element minOccurs="0" name="AlumniImages" nillable="true" type="tns:ArrayOfAlumniImage" />
+      <xs:element minOccurs="0" name="DateOfBirth" nillable="true" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="Degree" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="District" nillable="true" type="tns:District" />
+      <xs:element minOccurs="0" name="DistrictID" nillable="true" type="xs:int" />
+      <xs:element minOccurs="0" name="Email" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FirstName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Gender" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="GraduationYear" nillable="true" type="xs:int" />
+      <xs:element minOccurs="0" name="JobAttachments" nillable="true" type="tns:ArrayOfJobAttachment" />
+      <xs:element minOccurs="0" name="JobCandidates" nillable="true" type="tns:ArrayOfJobCandidate" />
+      <xs:element minOccurs="0" name="JobHistories" nillable="true" type="tns:ArrayOfJobHistory" />
+      <xs:element minOccurs="0" name="LastName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="LinkedInProfile" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Major" nillable="true" type="tns:Major" />
+      <xs:element minOccurs="0" name="MajorID" nillable="true" type="xs:int" />
+      <xs:element minOccurs="0" name="MiddleName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="MobileNumber" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ModifiedDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="PhotoName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="PhotoPath" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Alumni" nillable="true" type="tns:Alumni" />
+  <xs:complexType name="ArrayOfAlumniHobby">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="AlumniHobby" nillable="true" type="tns:AlumniHobby" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfAlumniHobby" nillable="true" type="tns:ArrayOfAlumniHobby" />
+  <xs:complexType name="AlumniHobby">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Alumni" nillable="true" type="tns:Alumni" />
+      <xs:element minOccurs="0" name="AlumniID" type="xs:int" />
+      <xs:element minOccurs="0" name="Hobby" nillable="true" type="tns:Hobby" />
+      <xs:element minOccurs="0" name="HobbyID" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="AlumniHobby" nillable="true" type="tns:AlumniHobby" />
+  <xs:complexType name="Hobby">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="AlumniHobbies" nillable="true" type="tns:ArrayOfAlumniHobby" />
+      <xs:element minOccurs="0" name="HobbyID" type="xs:int" />
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Hobby" nillable="true" type="tns:Hobby" />
+  <xs:complexType name="ArrayOfAlumniImage">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="AlumniImage" nillable="true" type="tns:AlumniImage" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfAlumniImage" nillable="true" type="tns:ArrayOfAlumniImage" />
+  <xs:complexType name="AlumniImage">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Alumni" nillable="true" type="tns:Alumni" />
+      <xs:element minOccurs="0" name="AlumniID" type="xs:int" />
+      <xs:element minOccurs="0" name="FileName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ImageID" type="xs:int" />
+      <xs:element minOccurs="0" name="ImagePath" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="UploadDate" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="AlumniImage" nillable="true" type="tns:AlumniImage" />
+  <xs:complexType name="District">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Alumnis" nillable="true" type="tns:ArrayOfAlumni" />
+      <xs:element minOccurs="0" name="DistrictID" type="xs:int" />
+      <xs:element minOccurs="0" name="DistrictName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="State" nillable="true" type="tns:State" />
+      <xs:element minOccurs="0" name="StateID" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="District" nillable="true" type="tns:District" />
+  <xs:complexType name="ArrayOfAlumni">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Alumni" nillable="true" type="tns:Alumni" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfAlumni" nillable="true" type="tns:ArrayOfAlumni" />
+  <xs:complexType name="State">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Districts" nillable="true" type="tns:ArrayOfDistrict" />
+      <xs:element minOccurs="0" name="StateID" type="xs:int" />
+      <xs:element minOccurs="0" name="StateName" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="State" nillable="true" type="tns:State" />
+  <xs:complexType name="ArrayOfDistrict">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="District" nillable="true" type="tns:District" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfDistrict" nillable="true" type="tns:ArrayOfDistrict" />
+  <xs:complexType name="ArrayOfJobAttachment">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JobAttachment" nillable="true" type="tns:JobAttachment" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJobAttachment" nillable="true" type="tns:ArrayOfJobAttachment" />
+  <xs:complexType name="JobAttachment">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Alumni" nillable="true" type="tns:Alumni" />
+      <xs:element minOccurs="0" name="AlumniID" type="xs:int" />
+      <xs:element minOccurs="0" name="AttachmentID" type="xs:int" />
+      <xs:element minOccurs="0" name="AttachmentType" nillable="true" type="tns:AttachmentType" />
+      <xs:element minOccurs="0" name="AttachmentTypeID" type="xs:unsignedByte" />
+      <xs:element minOccurs="0" name="FileName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FilePath" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="JobID" type="ser:guid" />
+      <xs:element minOccurs="0" name="JobPosting" nillable="true" type="tns:JobPosting" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JobAttachment" nillable="true" type="tns:JobAttachment" />
+  <xs:complexType name="AttachmentType">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="AttachmentTypeID" type="xs:unsignedByte" />
+      <xs:element minOccurs="0" name="JobAttachmentTypes" nillable="true" type="tns:ArrayOfJobAttachmentType" />
+      <xs:element minOccurs="0" name="JobAttachments" nillable="true" type="tns:ArrayOfJobAttachment" />
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="AttachmentType" nillable="true" type="tns:AttachmentType" />
+  <xs:complexType name="ArrayOfJobAttachmentType">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JobAttachmentType" nillable="true" type="tns:JobAttachmentType" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJobAttachmentType" nillable="true" type="tns:ArrayOfJobAttachmentType" />
+  <xs:complexType name="JobAttachmentType">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="AttachmentType" nillable="true" type="tns:AttachmentType" />
+      <xs:element minOccurs="0" name="AttachmentTypeID" type="xs:unsignedByte" />
+      <xs:element minOccurs="0" name="JobID" type="ser:guid" />
+      <xs:element minOccurs="0" name="JobPosting" nillable="true" type="tns:JobPosting" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JobAttachmentType" nillable="true" type="tns:JobAttachmentType" />
+  <xs:complexType name="JobPosting">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Company" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="EmploymentType" nillable="true" type="tns:EmploymentType" />
+      <xs:element minOccurs="0" name="EmploymentTypeID" type="xs:unsignedByte" />
+      <xs:element minOccurs="0" name="IsActive" type="xs:boolean" />
+      <xs:element minOccurs="0" name="IsClosed" nillable="true" type="xs:boolean" />
+      <xs:element minOccurs="0" name="JobAttachmentTypes" nillable="true" type="tns:ArrayOfJobAttachmentType" />
+      <xs:element minOccurs="0" name="JobAttachments" nillable="true" type="tns:ArrayOfJobAttachment" />
+      <xs:element minOccurs="0" name="JobCandidates" nillable="true" type="tns:ArrayOfJobCandidate" />
+      <xs:element minOccurs="0" name="JobDescription" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="JobID" type="ser:guid" />
+      <xs:element minOccurs="0" name="JobSkills" nillable="true" type="tns:ArrayOfJobSkill" />
+      <xs:element minOccurs="0" name="MinimumExperience" type="xs:unsignedByte" />
+      <xs:element minOccurs="0" name="ModifiedDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="Title" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JobPosting" nillable="true" type="tns:JobPosting" />
+  <xs:complexType name="EmploymentType">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="EmploymentTypeID" type="xs:unsignedByte" />
+      <xs:element minOccurs="0" name="JobPostings" nillable="true" type="tns:ArrayOfJobPosting" />
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="EmploymentType" nillable="true" type="tns:EmploymentType" />
+  <xs:complexType name="ArrayOfJobPosting">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JobPosting" nillable="true" type="tns:JobPosting" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJobPosting" nillable="true" type="tns:ArrayOfJobPosting" />
+  <xs:complexType name="ArrayOfJobCandidate">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JobCandidate" nillable="true" type="tns:JobCandidate" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJobCandidate" nillable="true" type="tns:ArrayOfJobCandidate" />
+  <xs:complexType name="JobCandidate">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Alumni" nillable="true" type="tns:Alumni" />
+      <xs:element minOccurs="0" name="AlumniID" type="xs:int" />
+      <xs:element minOccurs="0" name="ApplyDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="JobID" type="ser:guid" />
+      <xs:element minOccurs="0" name="JobPosting" nillable="true" type="tns:JobPosting" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JobCandidate" nillable="true" type="tns:JobCandidate" />
+  <xs:complexType name="ArrayOfJobSkill">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JobSkill" nillable="true" type="tns:JobSkill" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJobSkill" nillable="true" type="tns:ArrayOfJobSkill" />
+  <xs:complexType name="JobSkill">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="JobID" type="ser:guid" />
+      <xs:element minOccurs="0" name="JobPosting" nillable="true" type="tns:JobPosting" />
+      <xs:element minOccurs="0" name="Skill" nillable="true" type="tns:Skill" />
+      <xs:element minOccurs="0" name="SkillID" type="xs:unsignedByte" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JobSkill" nillable="true" type="tns:JobSkill" />
+  <xs:complexType name="Skill">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="IsActive" type="xs:boolean" />
+      <xs:element minOccurs="0" name="JobSkills" nillable="true" type="tns:ArrayOfJobSkill" />
+      <xs:element minOccurs="0" name="ModifiedDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="SkillID" type="xs:unsignedByte" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Skill" nillable="true" type="tns:Skill" />
+  <xs:complexType name="ArrayOfJobHistory">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="JobHistory" nillable="true" type="tns:JobHistory" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfJobHistory" nillable="true" type="tns:ArrayOfJobHistory" />
+  <xs:complexType name="JobHistory">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Alumni" nillable="true" type="tns:Alumni" />
+      <xs:element minOccurs="0" name="AlumniID" nillable="true" type="xs:int" />
+      <xs:element minOccurs="0" name="Company" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="EndDate" nillable="true" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="JobHistoryID" type="xs:int" />
+      <xs:element minOccurs="0" name="JobTitle" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ModifiedDate" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="StartDate" nillable="true" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="JobHistory" nillable="true" type="tns:JobHistory" />
+  <xs:complexType name="Major">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Alumnis" nillable="true" type="tns:ArrayOfAlumni" />
+      <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Faculty" nillable="true" type="tns:Faculty" />
+      <xs:element minOccurs="0" name="FacultyID" nillable="true" type="xs:int" />
+      <xs:element minOccurs="0" name="MajorID" type="xs:int" />
+      <xs:element minOccurs="0" name="MajorName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="ModifiedDate" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Major" nillable="true" type="tns:Major" />
+  <xs:complexType name="Faculty">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Description" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FacultyID" type="xs:int" />
+      <xs:element minOccurs="0" name="FacultyName" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Majors" nillable="true" type="tns:ArrayOfMajor" />
+      <xs:element minOccurs="0" name="ModifiedDate" type="xs:dateTime" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Faculty" nillable="true" type="tns:Faculty" />
+  <xs:complexType name="ArrayOfMajor">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Major" nillable="true" type="tns:Major" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfMajor" nillable="true" type="tns:ArrayOfMajor" />
+</xs:schema>

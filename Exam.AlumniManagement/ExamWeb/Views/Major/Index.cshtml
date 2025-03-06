@@ -1,0 +1,438 @@
+﻿@model ExamWeb.Models.MajorModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.7/css/fixedHeader.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .table-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Atur tampilan tabel agar responsif */
+        .dataTables_wrapper {
+            width: 100%;
+            max-width: 1200px; /* Atur sesuai kebutuhan */
+            margin: 0 auto;
+        }
+
+        /* Pastikan tabel menyesuaikan layar */
+        table.dataTable {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Penyesuaian untuk pagination & informasi */
+        .dataTables_wrapper .dataTables_paginate {
+            float: none;
+            text-align: center;
+        }
+
+        .dataTables_wrapper .dataTables_info {
+            float: left;
+            padding-top: 0.755em;
+        }
+
+        .dataTables_wrapper .bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+}
+
+<h2>Major</h2>
+
+<button id="createButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+    Add New
+</button>
+
+@*delete checkbox*@
+<button id="deleteSelected" class="btn btn-danger">Delete Selected</button>
+
+<table class="table" id="majorsData" style="width:100%">
+    <thead>
+        <tr>
+            <th><input type="checkbox" id="selectAll" /></th>
+            <th>Actions</th>
+            <th>No.</th>
+            <th>
+                @Html.DisplayNameFor(model => model.FacultyNames)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.MajorName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ModifiedDate)
+            </th>
+        </tr>
+    </thead>
+</table>
+
+@*Create modal*@
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createModalLabel">Create New Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @using (Html.BeginForm("Create", "Major", FormMethod.Post, new { id = "createForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.MajorName, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.MajorName, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.MajorName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            @Html.Label("Faculty")
+                            @Html.DropDownListFor(model => model.FacultyID, (IEnumerable<SelectListItem>)ViewBag.FacultyList, "Select Faculty", new { @class = "form-control", id = "FacultyDropdown" })
+                            @Html.ValidationMessageFor(model => model.FacultyID, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group mt-2">
+                            Descriptions
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Create</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@*Edit modal*@
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Faculty</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @using (Html.BeginForm("Edit", "Major", FormMethod.Post, new { id = "editForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.MajorID)
+                        <div class="form-group">
+                            Name
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.MajorName, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.MajorName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            @Html.Label("Faculty")
+                            @Html.DropDownListFor(model => model.FacultyID, (IEnumerable<SelectListItem>)ViewBag.FacultyList, "Select Faculty", new { @class = "form-control", id = "FacultyDropdown" })
+                            @Html.ValidationMessageFor(model => model.FacultyID, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group mt-2">
+                            Descriptions
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var table = $('#majorsData').DataTable({
+                "ajax": {
+                    "url": "@Url.Action("GetMajors", "Major")",
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return '<input type="checkbox" class="selectCheckbox" data-id="' + row.MajorID + '" />';
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return '<div style="display: flex; gap: 5px;">' +
+                                   '<a href="javascript:void(0);" class="btn btn-primary" data-id="' + row.MajorID + '" id="editButton" style="margin-left: 5px;">Edit</a>' +
+                                   '<button id="deleteButton" class="btn btn-danger deleteButton" data-id="' + row.MajorID + '" style="margin-left: 5px;">Delete</button>' +
+                                   '</div>';
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + 1;
+                        }
+                    },
+                    { "data": "FacultyNames" },
+                    { "data": "MajorName" },
+                    { "data": "Description"},
+                    {
+                        "data": "ModifiedDate",
+                        "render": function (data, type, row) {
+                            return moment(data).format('DD-MMM-YYYY hh:mm:ss A');
+                        }
+                    }
+                ],
+                "dom": '<"top"f>rt<"bottom"lpi><"clear">',
+                "pagingType": "full_numbers",
+                "pageLength": 10,
+                "lengthMenu": [5, 10, 20, 30, 100],
+                "scrollY": "400px",
+                "scrollX": true,
+                "scrollCollapse": true,
+                "fixedHeader": true,
+                "language": {
+                    "paginate": {
+                        "previous": "Previous",
+                        "next": "Next",
+                        "first": "<<",
+                        "last": ">>"
+                    }
+                }
+            });
+
+            $('#majorsData_filter input').unbind();
+            $('#majorsData_filter input').on('keyup', function (e) {
+                var value = $(this).val();
+                if (value.length >= 3 || value.length === 0) {
+                    table.search(value).draw();
+                }
+            });
+
+            $(document).on('click', '.deleteButton', function () {
+                const itemId = $(this).data('id');
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Once deleted, you will not be able to recover this item!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete it!",
+                    cancelButtonText: "Cancel",
+                    dangerMode: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/Major/Delete',
+                            type: 'POST',
+                            data: { id: itemId },
+                            success: function (response) {
+                                if (response.success) {
+                                    Swal.fire("Deleted!", response.message, "success").then(() => {
+                                        table.ajax.reload();
+                                    });
+                                } else {
+                                    Swal.fire("Error!", response.message, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error!", "Unable to delete the item. Please try again.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+
+            $('#selectAll').on('click', function () {
+                var rows = table.rows({ 'search': 'applied' }).nodes();
+                $('input[type="checkbox"]', rows).prop('checked', this.checked);
+            });
+
+            $('#deleteSelected').on('click', function () {
+                var selectedIds = [];
+                $('.selectCheckbox:checked').each(function () {
+                    selectedIds.push($(this).data('id'));
+                });
+                if (selectedIds.length > 0) {
+                    Swal.fire({
+                        title: "Are you sure? you will not be able to recover these items!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, delete them!",
+                        cancelButtonText: "No, keep them"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: '/Major/DeleteSelected',
+                                type: 'POST',
+                                data: { ids: selectedIds },
+                                traditional: true,
+                                success: function (response) {
+                                    if (response.success) {
+                                        Swal.fire("Deleted!", response.message, "success").then(() => {
+                                            $('#majorsData').DataTable().ajax.reload();
+                                        });
+                                    } else {
+                                        Swal.fire("Error!", response.message, "error");
+                                    }
+                                },
+                                error: function (error) {
+                                    Swal.fire("Error!", "Unable to delete the items. Please try again.", "error");
+                                }
+                            });
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            Swal.fire("Cancelled", "Your items are safe :)", "error");
+                        }
+                    });
+                } else {
+                    Swal.fire("No items selected", "Please select items to delete.", "info");
+                }
+            });
+
+            // Inisialisasi Select2 pada dropdown Faculty di modal Create dan Edit
+            $('#createModal').on('shown.bs.modal', function () {
+                $('#createModal #FacultyDropdown').select2({
+                    placeholder: "Select Faculty",
+                    allowClear: true,
+                    dropdownParent: $('#createModal')
+                });
+            });
+
+            $('#editModal').on('shown.bs.modal', function () {
+                $('#editModal #FacultyDropdown').select2({
+                    placeholder: "Select Faculty",
+                    allowClear: true,
+                    dropdownParent: $('#editModal')
+                });
+            });
+
+            //Create form JS
+            $('#createForm').submit(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            $('#createModal').modal('hide');
+                            $('#createForm')[0].reset();
+                            $('#majorsData').DataTable().ajax.reload();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: "Faculty added succesfully",
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.errorMsg,
+                                showConfirmButton: true
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        alert('An error occurred while saving.');
+                    }
+                });
+            });
+
+            //Edit form JS
+            $(document).on('click', '#editButton', function () {
+                var MajorID = $(this).data('id');
+                $.ajax({
+                    url: '/Major/GetMajorID/' + MajorID,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        $('#editModal #MajorID').val(response.MajorID);
+                        $('#editModal #MajorName').val(response.MajorName);
+                        $('#editModal #Description').val(response.Description);
+                        $('#editModal #FacultyDropdown').val(response.FacultyID).trigger('change');
+                        $('#editModal').modal('show');
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        alert('An error occurred while fetching data.');
+                    }
+                });
+            });
+
+
+            $('#editForm').submit(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            $('#editModal').modal('hide');
+                            $('#majorsData').DataTable().ajax.reload();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: "Edit Major Successful",
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.errorMsg,
+                                showConfirmButton: true
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        alert('An error occurred while saving.');
+                    }
+                });
+            });
+        });
+    </script>
+}

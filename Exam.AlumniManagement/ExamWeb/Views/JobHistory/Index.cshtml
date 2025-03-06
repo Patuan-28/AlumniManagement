@@ -1,0 +1,581 @@
+﻿@model ExamWeb.Models.JobHistoryModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    // Tanggal hari ini dalam format yyyy-MM-dd
+    var today = DateTime.Now.ToString("yyyy-MM-dd");
+    var startDateValue = Model?.StartDate?.ToString("yyyy-MM-dd");
+    var endDateValue = Model?.EndDate?.ToString("yyyy-MM-dd");
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.7/css/fixedHeader.dataTables.min.css">
+    <style>
+        .table-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Atur tampilan tabel agar responsif */
+        .dataTables_wrapper {
+            width: 100%;
+            max-width: 1200px; /* Atur sesuai kebutuhan */
+            margin: 0 auto;
+        }
+
+        /* Pastikan tabel menyesuaikan layar */
+        table.dataTable {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Penyesuaian untuk pagination & informasi */
+        .dataTables_wrapper .dataTables_paginate {
+            float: none;
+            text-align: center;
+        }
+
+        .dataTables_wrapper .dataTables_info {
+            float: left;
+            padding-top: 0.755em;
+        }
+
+        .dataTables_wrapper .bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+}
+<h2>Job History of @ViewBag.FullName</h2>
+
+<a href="@Url.Action("Create", "JobHistory", new { alumniID = ViewBag.AlumniID })" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+    <i class="fas fa-plus"></i> Add New
+</a>
+
+@*delete checkbox*@
+<button id="deleteSelected" class="btn btn-danger">Delete Selected</button>
+
+<table class="table" id="jhData" style="width:100%">
+    <thead>
+        <tr>
+            <th><input type="checkbox" id="selectAll" /></th>
+            <th>Actions</th>
+            <th>No.</th>
+            <th>
+                Title
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Company)
+            </th>
+            <th>
+                Start Date
+            </th>
+            <th>
+                End Date
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                Last Update
+            </th>
+        </tr>
+    </thead>
+</table>
+
+<button type="button" class="btn btn-secondary" onclick="history.back()">
+    <i class="fas fa-arrow-left"></i> Back
+</button>
+
+@*Create modal*@
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createModalLabel">Create New Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @using (Html.BeginForm("Create", "JobHistory", FormMethod.Post, new { id = "createForm" }))
+            {
+                @Html.AntiForgeryToken()
+                //Template location
+                <div class="modal-body">
+
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <!-- Hidden AlumniID Field -->
+                        <input type="hidden" name="alumniID" value="@ViewBag.AlumniID" />
+                        <div class="form-group">
+                            Job Title
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.JobTitle, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.JobTitle, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.Company, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Company, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Company, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            Start Date
+                            <div class="col-md-10">
+                                <input type="date" id="StartDate" name="StartDate" class="form-control"
+                                       value="@startDateValue"
+                                       max="@today" />
+                                @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            End Date
+                            <div class="col-md-10">
+                                <input type="date" id="EndDate" name="EndDate" class="form-control"
+                                       value="@endDateValue" />
+                                @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@*Edit modal*@
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Job History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @using (Html.BeginForm("Edit", "JobHistory", FormMethod.Post, new { id = "editForm" }))
+            {
+                @Html.AntiForgeryToken()
+                //Template Edit
+                <div class="modal-body">
+
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.JobHistoryID)
+                        <!-- Hidden AlumniID Field -->
+                        <input type="hidden" name="alumniID" value="@ViewBag.AlumniID" />
+                        <div class="form-group">
+                            Job Title
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.JobTitle, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.JobTitle, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.Company, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Company, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Company, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            Start Date
+                            <div class="col-md-10">
+                                <input type="date" id="StartDate" name="StartDate" class="form-control"
+                                       value="@(Model?.StartDate != null ? Model.StartDate.Value.ToString("yyyy-MM-dd") : "")" />
+                                @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            End Date
+                            <div class="col-md-10">
+                                <input type="date" id="EndDate" name="EndDate" class="form-control"
+                                       value="@(Model?.EndDate != null ? Model.EndDate.Value.ToString("yyyy-MM-dd") : "")" />
+                                @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Description, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var alumniID = '@ViewBag.AlumniID';
+            var table = $('#jhData').DataTable({
+                "ajax": {
+                    "url": "@Url.Action("GetJobHistories", "JobHistory")",
+                    "type": "GET",
+                    "datatype": "json",
+                    "data": { id: alumniID },
+                    "error": function (xhr, error, thrown) {
+                        console.log("AJAX Error:", error, thrown);
+                        console.log("Response:", xhr.responseText);
+                    }
+                },
+                "columns": [
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return '<input type="checkbox" class="selectCheckbox" data-id="' + row.JobHistoryID + '" />';
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            var editLink = '@Url.Action("Edit", "JobHistory", new { id = "PLACEHOLDER" })'.replace("PLACEHOLDER", row.JobHistoryID);
+                            return '<div style="display: flex; gap: 5px;">' +
+                                '<a href="javascript:void(0);" class="btn btn-primary" data-id="' + row.JobHistoryID + '" id="editButton">Edit</a>' +
+                                '<button class="btn btn-danger deleteButton" data-id="' + row.JobHistoryID + '">Delete</button>' +
+                                '</div>';
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + 1;
+                        }
+                    },
+                    { "data": "JobTitle" },
+                    { "data": "Company" },
+                    {
+                        "data": "StartDate",
+                        "render": function (data) {
+                            return moment(data).format('DD-MMM-YYYY');
+                        }
+                    },
+                    {
+                        "data": "EndDate",
+                        "render": function (data) {
+                            return data ? moment(data).format('DD-MMM-YYYY') : "";
+                        }
+                    },
+                    { "data": "Description" },
+                    {
+                        "data": "ModifiedDate",
+                        "render": function (data) {
+                            return moment(data).format('DD-MMM-YYYY hh:mm:ss A');
+                        }
+                    }
+                ],
+                "dom": '<"top"f>rt<"bottom"lpi><"clear">',
+                "pagingType": "full_numbers",
+                "pageLength": 10,
+                "lengthMenu": [5, 10, 20, 30, 100],
+                "scrollY": "400px",
+                "scrollX": true,
+                "scrollCollapse": true,
+                "fixedHeader": true,
+                "language": {
+                    "paginate": {
+                        "previous": "Previous",
+                        "next": "Next",
+                        "first": "<<",
+                        "last": ">>"
+                    }
+                }
+            });
+
+            $('#jhData_filter input').unbind();
+            $('#jhData_filter input').on('keyup', function (e) {
+                var value = $(this).val();
+                if (value.length >= 3 || value.length === 0) {
+                    table.search(value).draw();
+                }
+            });
+
+            $(document).on('click', '.deleteButton', function () {
+                const itemId = $(this).data('id');
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Once deleted, you will not be able to recover this item!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete it!",
+                    cancelButtonText: "Cancel"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/JobHistory/Delete',
+                            type: 'POST',
+                            data: { id: itemId },
+                            success: function (response) {
+                                if (response.success) {
+                                    Swal.fire("Deleted!", response.message, "success").then(() => {
+                                        table.ajax.reload();
+                                    });
+                                } else {
+                                    Swal.fire("Error!", response.message, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error!", "Unable to delete the item. Please try again.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+
+            $('#selectAll').on('click', function () {
+                var rows = table.rows({ 'search': 'applied' }).nodes();
+                $('input[type="checkbox"]', rows).prop('checked', this.checked);
+            });
+            $('#deleteSelected').on('click', function () {
+                var selectedIds = [];
+                $('.selectCheckbox:checked').each(function () {
+                    selectedIds.push($(this).data('id'));
+                });
+                if (selectedIds.length > 0) {
+                    Swal.fire({
+                        title: "Are you sure? you will not be able to recover these items!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, delete them!",
+                        cancelButtonText: "No, keep them"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Make an AJAX call to delete the selected items
+                            $.ajax({
+                                url: '/JobHistory/DeleteSelected',  //CHANGE THE URL
+                                type: 'POST',
+                                data: { ids: selectedIds },
+                                traditional: true,
+                                success: function (response) {
+                                    if (response.success) {
+                                        Swal.fire("Deleted!", response.message, "success").then(() => {
+                                            $('#jhData').DataTable().ajax.reload(); // CHANGE THE TABLE ID
+                                        });
+                                    } else {
+                                        Swal.fire("Error!", response.message, "error");
+                                    }
+                                },
+                                error: function (error) {
+                                    Swal.fire("Error!", "Unable to delete the items. Please try again.", "error");
+                                }
+                            });
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            Swal.fire("Cancelled", "Your items are safe :)", "error");
+                        }
+                    });
+                } else {
+                    Swal.fire("No items selected", "Please select items to delete.", "info");
+                }
+            });
+
+            //Create form JS
+            $(document).ready(function () {
+                $('#createForm').submit(function (e) {
+                    e.preventDefault();
+
+                    $.ajax({
+                        url: $(this).attr('action'), // Form action URL
+                        type: 'POST',
+                        data: $(this).serialize(),
+                        success: function (response) {
+                            if (response.success) {
+                                $('#createModal').modal('hide'); // Close modal
+                                $('#createForm')[0].reset();
+                                $('#jhData').DataTable().ajax.reload(); //CHANGE THE TABLE ID
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success',
+                                    text: "Job history added succesfully",
+                                    timer: 5000,
+                                    timerProgressBar: true,
+                                    showConfirmButton: false
+                                });
+
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.errorMsg,
+                                    showConfirmButton: true // Show OK button
+                                });
+
+                            }
+                        },
+                        error: function (xhr) {
+                            console.error(xhr.responseText);
+                            alert('An error occurred while saving.');
+                        }
+                    });
+                });
+            });
+
+            //Edit form JS
+            $(document).on('click', '#editButton', function () {
+                var JobHistoryID = $(this).data('id'); // CHANGE VARIABLE NAME
+
+                // Make an AJAX request to get the data for the selected ProductCategory
+                $.ajax({
+                    url: '/JobHistory/GetJobHistoryID/' + JobHistoryID, // CHANGE THE URL
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        // Populate the form fields with the data returned from the server // CHANGE THE CONTENTS
+                        $('#editModal #JobHistoryID').val(response.JobHistoryID); // Assuming you have a hidden field for ID
+                        $('#editModal #JobTitle').val(response.JobTitle);
+                        $('#editModal #Company').val(response.Company);
+                        $('#editModal #Description').val(response.Description);
+
+                        // Populate Start Date
+                        if (response.StartDate) {
+                            var formattedDate = moment(response.StartDate).format('YYYY-MM-DD');
+                            $('#editModal #StartDate').val(formattedDate);
+                        }
+                        if (response.EndDate) {
+                            var formattedDate = moment(response.EndDate).format('YYYY-MM-DD');
+                            $('#editModal #EndDate').val(formattedDate);
+                        }
+
+                        // Show the Edit Modal
+                        $('#editModal').modal('show');
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        alert('An error occurred while fetching data.');
+                    }
+                });
+            });
+
+            $('#editForm').submit(function (e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: $(this).attr('action'), // Form action URL
+                    type: 'POST',
+                    data: $(this).serialize(), // Serialize the form data
+                    success: function (response) {
+                        if (response.success) {
+                            $('#editModal').modal('hide'); // Close the modal
+                            $('#jhData').DataTable().ajax.reload(); // Reload DataTable
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: "Edit Job History Successful",
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+
+                            })
+                        }
+                        else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.errorMsg || "Failed to update job history.",
+                                showConfirmButton: true
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: "An error occurred while saving. Please try again.",
+                            showConfirmButton: true
+                        });
+                    }
+                });
+            });
+
+
+            //$(function () {
+            //    $(".datepicker").datepicker({
+            //        dateFormat: "yy-mm-dd",
+            //        changeMonth: true,
+            //        changeYear: true,
+            //        showButtonPanel: true
+            //    });
+            //});
+        });
+
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var startDateInput = document.getElementById('StartDate');
+            var endDateInput = document.getElementById('EndDate');
+            var today = new Date().toISOString().split('T')[0]; // Mendapatkan tanggal hari ini dalam format YYYY-MM-DD
+
+            // Set max attribute untuk Start Date (tidak boleh lebih dari hari ini)
+            startDateInput.setAttribute('max', today);
+
+            // Event listener untuk Start Date
+            startDateInput.addEventListener('change', function () {
+                var startDate = this.value;
+
+                // Set min dan max attribute untuk End Date
+                endDateInput.setAttribute('min', startDate);
+                endDateInput.setAttribute('max', today);
+
+                // Jika End Date sudah diisi dan tidak valid, reset nilainya
+                if (endDateInput.value < startDate || endDateInput.value > today) {
+                    endDateInput.value = startDate;
+                }
+            });
+
+            // Event listener untuk End Date
+            endDateInput.addEventListener('change', function () {
+                var startDate = startDateInput.value;
+                var endDate = this.value;
+
+                // Validasi End Date
+                if (endDate < startDate) {
+                    alert('End Date cannot be earlier than Start Date.');
+                    this.value = startDate;
+                } else if (endDate > today) {
+                    alert('End Date cannot be later than today.');
+                    this.value = today;
+                }
+            });
+        });
+    </script>
+}

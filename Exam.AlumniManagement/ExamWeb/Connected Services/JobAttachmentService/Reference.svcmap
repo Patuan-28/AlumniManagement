@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="785291ca-57f4-4016-bf97-3c9af38017f2" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:50219/Services/JobAttachmentService.svc" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="JobAttachmentService.disco" MetadataType="Disco" ID="1c0f5c00-2071-4643-a242-6d17657a6343" SourceId="1" SourceUrl="http://localhost:50219/Services/JobAttachmentService.svc?disco" />
+    <MetadataFile FileName="JobAttachmentService3.xsd" MetadataType="Schema" ID="993c1d14-0b8d-4335-b770-11c4c894c768" SourceId="1" SourceUrl="http://localhost:50219/Services/JobAttachmentService.svc?xsd=xsd3" />
+    <MetadataFile FileName="JobAttachmentService.xsd" MetadataType="Schema" ID="1e3f2c7f-8bf1-4881-9e98-a13b4328836e" SourceId="1" SourceUrl="http://localhost:50219/Services/JobAttachmentService.svc?xsd=xsd2" />
+    <MetadataFile FileName="JobAttachmentService1.xsd" MetadataType="Schema" ID="3f499c9e-0328-4b6d-86ba-44051e434d70" SourceId="1" SourceUrl="http://localhost:50219/Services/JobAttachmentService.svc?xsd=xsd1" />
+    <MetadataFile FileName="JobAttachmentService2.xsd" MetadataType="Schema" ID="79d57db2-0f55-43de-907c-02694805d54d" SourceId="1" SourceUrl="http://localhost:50219/Services/JobAttachmentService.svc?xsd=xsd0" />
+    <MetadataFile FileName="JobAttachmentService.wsdl" MetadataType="Wsdl" ID="006c8f50-567a-4ca0-aeb7-c733b64dbecf" SourceId="1" SourceUrl="http://localhost:50219/Services/JobAttachmentService.svc?wsdl" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

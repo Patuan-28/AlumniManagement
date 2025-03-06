@@ -1,0 +1,742 @@
+﻿@model ExamWeb.Models.EventModel
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.7/css/fixedHeader.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        .dataTables_wrapper {
+            width: 100%;
+        }
+
+            .dataTables_wrapper .dataTables_paginate {
+                float: none;
+                text-align: center;
+            }
+
+            .dataTables_wrapper .dataTables_info {
+                float: left;
+                padding-top: 0.755em;
+            }
+
+            .dataTables_wrapper .bottom {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+        .table img {
+            width: 50px; /* Or any fixed width */
+            height: 50px; /* Keeps the rows uniform */
+            object-fit: cover; /* Ensures images fill the space without distortion */
+            cursor: pointer;
+        }
+
+        .icon-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hidden-icons {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 100%; /* Position it to the right of the button */
+            transform: translateY(-10%); /* Center it vertically */
+            background: white;
+            border: 1px solid #ddd;
+            padding: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            white-space: nowrap; /* Prevents icons from wrapping */
+        }
+
+        .icon-container:hover .hidden-icons {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .icon-container .main-icon {
+            cursor: pointer;
+        }
+
+        #scrollToTopButton {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #007bff; /* Primary Blue */
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+
+            #scrollToTopButton:hover {
+                background-color: #0056b3; /* Darker blue on hover */
+                transform: scale(1.1);
+                box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.3);
+            }
+    </style>
+
+}
+<h2>Events</h2>
+
+<button id="createButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+    Add New
+</button>
+
+<button id="deleteSelected" class="btn btn-danger">Delete Selected</button>
+
+<table class="table" id="eventsData" style="width: 100%">
+    <thead class="text-center">
+        <tr>
+            <th><input type="checkbox" id="selectAll" /></th>
+            <th>Actions</th>
+            <th>No.</th>
+            <th>
+                Preview
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                Date
+            </th>
+            <th>
+                Status
+            </th>
+            <th>
+                Last Update
+            </th>
+        </tr>
+    </thead>
+</table>
+
+@*@ImageModal@*@
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Preview Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" class="img-fluid" alt="Full Image" style="max-width: 300px;">
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+@*@Create modal@*@
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createModalLabel">Create Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @using (Html.BeginForm("UpsertEvent", "Event", FormMethod.Post, new { id = "createForm", enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                //Template location
+                <div class="modal-body">
+                    <!-- Form Starts Here -->
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.TextAreaFor(model => model.Description, new { @class = "form-control", rows = "4" })
+                                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label>Date</label>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    @Html.EditorFor(model => model.StartDate, new { htmlAttributes = new { @class = "form-control", type = "date", id = "startDate", min = DateTime.Now.ToString("yyyy-MM-dd") } })
+                                    @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-5">
+                                    @Html.EditorFor(model => model.EndDate, new { htmlAttributes = new { @class = "form-control", type = "date", id = "endDate" } })
+                                    @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label>Photo Preview</label>
+                            <div class="col-md-10">
+                                <img id="photoPreview" class="img-thumbnail" style="max-width: 150px; max-height: 150px; object-fit: cover; display: none;">
+                            </div>
+                            <p class="text-danger" id="fileError"></p>
+                        </div>
+
+                        <div class="form-group mt-2">
+                            <label for="file">Image</label>
+                            <div class="col-md-10">
+                                <input type="file" id="file" name="file" class="form-control" accept=".jpg, .jpeg, .png" required>
+                                <small class="text-muted">Allowed formats: .jpg, .jpeg, .png</small>
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label>Mark as Closed</label>
+                            <div class="form-check form-switch">
+                                @Html.CheckBoxFor(model => model.IsClosed, new { @class = "form-check-input", id = "isClosedSwitch" })
+                                <label class="form-check-label" id="isClosedLabel" for="isClosedSwitch">
+                                    @(Model != null && Model.IsClosed ? "Closed" : "Open")
+                                </label>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.IsClosed, "", new { @class = "text-danger" })
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@*@Edit modal@*@
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @using (Html.BeginForm("UpsertEvent", "Event", FormMethod.Post, new { id = "createForm", enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                //Template location
+                <div class="modal-body">
+                    <!-- Form Starts Here -->
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.EventID)
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.TextAreaFor(model => model.Description, new { @class = "form-control", rows = "4" })
+                                @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label>Date</label>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    @Html.EditorFor(model => model.StartDate, new { htmlAttributes = new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd") } })
+                                    @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-5">
+                                    @Html.EditorFor(model => model.EndDate, new { htmlAttributes = new { @class = "form-control", type = "date", min = DateTime.Now.ToString("yyyy-MM-dd") } })
+                                    @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label>Photo Preview</label>
+                            <div class="col-md-10">
+                                <img id="editPhotoPreview" class="img-thumbnail" style="max-width: 150px; max-height: 150px; object-fit: cover; display: none;">
+                            </div>
+                            <p class="text-danger" id="fileError"></p>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label for="editFile">Image</label>
+                            <div class="col-md-10">
+                                <input type="file" id="editFile" name="file" class="form-control" accept=".jpg, .jpeg, .png">
+                                <small class="text-muted">Allowed formats: .jpg, .jpeg, .png</small>
+                            </div>
+                        </div>
+                        <div class="form-group mt-2">
+                            <label>Mark as Closed</label>
+                            <div class="form-check form-switch">
+                                @Html.CheckBoxFor(model => model.IsClosed, new { @class = "form-check-input", id = "editIsClosedSwitch" })
+                                <label class="form-check-label" id="editIsClosedLabel" for="editIsClosedSwitch">
+                                    @(Model != null && Model.IsClosed ? "Closed" : "Open")
+                                </label>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.IsClosed, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            console.log('@Url.Action("GetEvents", "Event")');
+
+            var table = $('#eventsData').DataTable({
+                "ajax": {
+                    "url": '@Url.Action("GetEvents", "Event")',
+                    "type": "GET",
+                    "datatype": "json"
+                },
+                "columns": [
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            if (!row.IsClosed) {
+                                return '<input type="checkbox" class="selectCheckbox" data-id="' + row.EventID + '" />';
+                            } else {
+                                return '';
+                            }                            
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            let buttons = ""; // Default kosong
+
+                            // Jika event belum closed, tampilkan tombol Edit & Delete
+                            if (!row.IsClosed) {
+                                buttons += `
+                                <button class="btn btn-primary editButton" data-id="${row.EventID}" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger deleteButton" data-id="${row.EventID}" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            `;
+                            }
+
+                            return `<div style="display: flex; gap: 5px; align-items: center;">${buttons}</div>`;
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + 1;
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            var basePath = '@Url.Content("~/App_Data/EventPhotos")';
+                            var imagePath = basePath + '/' + row.EventImageName;
+                            return '<img src="' + imagePath + '" alt="Alumni Photo" class="img-thumbnail img-preview" ' +
+                                'data-image-src="' + imagePath + '" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">';
+                        }
+                    },
+                    { "data": "Title" },
+                    { "data": "Description" },
+                    {
+                        "data": null,
+                        "render": function (data) {
+                            console.log(data);
+                            var startDate = moment(data.StartDate).format('DD-MMM-YYYY');
+                            var endDate = moment(data.EndDate).format('DD-MMM-YYYY');
+
+                            var durationText = `(${data.Duration} Hari)`;
+
+                            return (startDate === endDate)
+                                ? `${startDate} ${durationText}`
+                                : `${startDate} - ${endDate} ${durationText}`;
+                        }
+                    },
+                    {
+                        "data": "IsClosed",
+                        "render": function (data, type, row) {
+                            return data ? '<span>Closed</span>'
+                                : '<span">Open</span>';
+                        }
+                    },
+                    {
+                        "data": "ModifiedDate",
+                        "render": function (data, type, row) {
+                            return moment(data).format('DD-MMM-YYYY hh:mm:ss A');
+                        }
+                    }
+                ],
+                "dom": '<"top"f>rt<"bottom"lpi><"clear">',
+                "pagingType": "full_numbers",
+                "pageLength": 10,
+                "lengthMenu": [5, 10, 20, 30, 100],
+                "scrollY": "400px",
+                "scrollX": true,
+                "scrollCollapse": true,
+                "fixedHeader": true,
+                "language": {
+                    "paginate": {
+                        "previous": "Previous",
+                        "next": "Next",
+                        "first": "<<",
+                        "last": ">>"
+                    }
+                },
+                "rowCallback": function (row, data) {
+                    if (data.IsClosed) {
+                        $(row).css('background-color', '#BAE0F3'); // Ubah warna baris jika Closed
+                    }
+                }
+            });
+            $('#eventsData_filter input').unbind();
+            $('#eventsData_filter input').on('keyup', function (e) {
+                var value = $(this).val();
+                if (value.length >= 3 || value.length === 0) {
+                    table.search(value).draw();
+                }
+            });
+            $(document).on('click', '.deleteButton', function () {
+                const itemId = $(this).data('id');
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Once deleted, you will not be able to recover this item!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete it!",
+                    cancelButtonText: "Cancel",
+                    dangerMode: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/Event/Delete',
+                            type: 'POST',
+                            data: { id: itemId },
+                            success: function (response) {
+                                if (response.success) {
+                                    Swal.fire("Deleted!", response.message, "success").then(() => {
+                                        table.ajax.reload();
+                                    });
+                                } else {
+                                    Swal.fire("Error!", response.message, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error!", "Unable to delete the item. Please try again.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+            $('#selectAll').on('click', function () {
+                var rows = table.rows({ 'search': 'applied' }).nodes();
+                $('input[type="checkbox"]', rows).prop('checked', this.checked);
+            });
+            $('#deleteSelected').on('click', function () {
+                var selectedIds = [];
+                $('.selectCheckbox:checked').each(function () {
+                    selectedIds.push($(this).data('id'));
+                });
+                if (selectedIds.length > 0) {
+                    Swal.fire({
+                        title: "Are you sure? you will not be able to recover these items!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, delete them!",
+                        cancelButtonText: "No, keep them"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Make an AJAX call to delete the selected items
+                            $.ajax({
+                                url: '/Event/DeleteSelected',
+                                type: 'POST',
+                                data: { ids: selectedIds },
+                                traditional: true,
+                                success: function (response) {
+                                    if (response.success) {
+                                        Swal.fire("Deleted!", response.message, "success").then(() => {
+                                            $('#eventsData').DataTable().ajax.reload(); // Reload the DataTable
+                                        });
+                                    } else {
+                                        Swal.fire("Error!", response.message, "error");
+                                    }
+                                },
+                                error: function (error) {
+                                    Swal.fire("Error!", "Unable to delete the items. Please try again.", "error");
+                                }
+                            });
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            Swal.fire("Cancelled", "Your items are safe :)", "error");
+                        }
+                    });
+                } else {
+                    Swal.fire("No items selected", "Please select items to delete.", "info");
+                }
+            });
+
+            $(document).ready(function () {
+                $('#isClosedSwitch').change(function () {
+                    let isChecked = $(this).prop('checked'); // More reliable than ':checked'
+                    $('#isClosedLabel').text(isChecked ? 'Closed' : 'Open');
+                });
+                $('#editIsClosedSwitch').change(function () {
+                    let isChecked = $(this).prop('checked'); // More reliable than ':checked'
+                    $('#editIsClosedLabel').text(isChecked ? 'Closed' : 'Open'); // Update correct label
+                });
+
+                // File input preview
+                $('#file').on('change', function (event) {
+                    var file = event.target.files[0]; // Get selected file
+                    if (file) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $('#photoPreview').attr('src', e.target.result).show(); // Set preview image source and make it visible
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        $('#photoPreview').hide(); // Hide preview if no file selected
+                    }
+                });
+
+                // AJAX Form Submission
+                $('#createForm').submit(function (e) {
+                    e.preventDefault();
+
+                    var formData = new FormData(this); // Use FormData to handle file uploads
+
+                    $.ajax({
+                        url: $(this).attr('action'),
+                        type: 'POST',
+                        data: formData,
+                        processData: false, // Prevent jQuery from automatically processing data
+                        contentType: false, // Ensure correct content type for file upload
+                        success: function (response) {
+                            if (response.success) {
+                                $('#createModal').modal('hide');
+                                $('#createForm')[0].reset();
+                                $('#photoPreview').hide();
+                                $('#isClosedSwitch').prop('checked', false); // Reset switch
+                                $('#isClosedLabel').text('Open'); // Reset label
+                                $('#eventsData').DataTable().ajax.reload();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success',
+                                    text: "Event added successfully",
+                                    timer: 5000,
+                                    timerProgressBar: true,
+                                    showConfirmButton: false
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.errorMsg,
+                                    showConfirmButton: true
+                                });
+                            }
+                        },
+                        error: function (xhr) {
+                            console.error(xhr.responseText);
+                            alert('An error occurred while saving.');
+                        }
+                    });
+                });
+            });
+
+            // For edit modal
+            $('#editFile').on('change', function (event) {
+                var file = event.target.files[0];
+                if (file) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#editPhotoPreview').attr('src', e.target.result).show();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    $('#editPhotoPreview').hide();
+                }
+            });
+
+            $(document).on('click', '.editButton', function () {
+                var eventID = $(this).data('id');
+                $.ajax({
+                    url: '/Event/GetEventByID/' + eventID,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        let eventImagePath = response.EventImagePath ? response.EventImagePath.replace("", "") + '/' + response.EventImageName : '/Images/placeholder.png';
+                        // Populate form fields
+                        $('#editModal #EventID').val(response.EventID);
+                        $('#editModal #Title').val(response.Title);
+                        $('#editModal #Description').val(response.Description);
+                        $('#editModal #IsClosed').val(response.IsClosed);
+                        $('#editModal #EditpreviewContainer img').attr('src', eventImagePath.trim());
+
+                        if (response.StartDate) {
+                            var formattedDate = moment(response.StartDate).format('YYYY-MM-DD');
+                            $('#editModal #StartDate').val(formattedDate);
+                        }
+                        if (response.EndDate) {
+                            var formattedDate = moment(response.EndDate).format('YYYY-MM-DD');
+                            $('#editModal #EndDate').val(formattedDate);
+                        }
+
+                        // *Populate Image Preview using AJAX response*
+                        if (response.EventImageName) {
+                            var basePath = '@Url.Content("~/App_Data/EventPhotos/")';
+                            var imagePath = basePath + '/' + response.EventImageName;
+                            $('#editPhotoPreview').attr('src', imagePath).show();
+                        } else {
+                            $('#editPhotoPreview').hide();
+                        }
+
+                        // Show the Edit Modal
+                        $('#editModal').modal('show');
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        alert('An error occurred while fetching data.');
+                    }
+                });
+            });
+
+            $('#editForm').submit(function (e) {
+                e.preventDefault();
+
+                var formData = new FormData(this); // Use FormData for file uploads
+
+                $.ajax({
+                    url: $(this).attr('action'), // Form action URL
+                    type: 'POST',
+                    data: formData,
+                    processData: false, // Prevent jQuery from processing data
+                    contentType: false, // Ensure correct content type for file upload
+                    success: function (response) {
+
+                        if (response.success) { // Ensure it's checking success correctly
+                            $('#editModal').modal('hide'); // Close modal
+                            $('#editForm')[0].reset(); // Reset form
+                            $('#eventsData').DataTable().ajax.reload(); // Reload DataTable
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: "Edit Event Successful",
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.errorMsg || "An unknown error occurred.",
+                                showConfirmButton: true
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error("AJAX Error:", xhr.responseText); // Log for debugging
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: "An error occurred while saving.",
+                            showConfirmButton: true
+                        });
+                    }
+                });
+            });
+
+            function updateIsClosedLabel() {
+                $('#editIsClosedLabel').text($('#editIsClosedSwitch').is(':checked') ? 'Closed' : 'Open');
+            }
+
+            $(document).ready(function () {
+                $('#file').on('change', function (event) {
+                    var file = event.target.files[0]; // Get the selected file
+                    if (file) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $('#photoPreview').attr('src', e.target.result).css('display', 'block'); // Set src and ensure visibility
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        $('#photoPreview').attr('src', '').css('display', 'none'); // Hide preview if no file selected
+                    }
+                });
+            });
+
+            $(document).on('click', '.img-preview', function () {
+                var images = $('.img-preview').map(function () {
+                    return $(this).data('image-src');
+                }).get();
+
+                var currentIndex = images.indexOf($(this).data('image-src'));
+
+                // Make sure updateModalImage() is defined; for example:
+                function updateModalImage() {
+                    $('#modalImage').attr('src', images[currentIndex]);
+                }
+                updateModalImage();
+
+                $('#imageModal').modal('show');
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const startDateInput = document.getElementById("startDate");
+            const endDateInput = document.getElementById("endDate");
+
+            // Set start date agar tidak bisa mundur dari hari ini
+            const today = new Date().toISOString().split("T")[0];
+            startDateInput.setAttribute("min", today);
+
+            startDateInput.addEventListener("change", function () {
+                // Pastikan endDate tidak kurang dari startDate
+                endDateInput.setAttribute("min", this.value);
+            });
+
+            endDateInput.addEventListener("change", function () {
+                if (this.value < startDateInput.value) {
+                    alert("End date tidak boleh lebih kecil dari start date.");
+                    this.value = startDateInput.value;
+                }
+            });
+        });
+    </script>
+
+}

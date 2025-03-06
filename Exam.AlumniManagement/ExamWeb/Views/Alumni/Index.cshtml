@@ -1,0 +1,1222 @@
+﻿@model ExamWeb.Models.AlumniModel
+
+@{
+    ViewBag.Title = "Alumni Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedheader/3.1.7/css/fixedHeader.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/3.3.2/css/fixedColumns.dataTables.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+
+        /* Pastikan tabel menggunakan fixed layout */
+        #alumnisData {
+            table-layout: fixed !important;
+            width: 100% !important;
+        }
+
+            /* Pastikan setiap kolom mengikuti width yang sudah ditentukan */
+            #alumnisData th,
+            #alumnisData td {
+                word-wrap: break-word;
+                overflow: hidden;
+                white-space: normal; /* Ganti nowrap menjadi normal agar teks bisa wrap */
+            }
+
+        #scrollTopBtn {
+            display: none; /* Tombol akan tersembunyi secara default */
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99;
+            font-size: 16px;
+            border: none;
+            outline: none;
+            background-color: #007bff; /* Warna biru */
+            color: white;
+            cursor: pointer;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+            #scrollTopBtn:hover {
+                background-color: #0056b3; /* Warna biru lebih gelap saat hover */
+            }
+
+            #scrollTopBtn.show {
+                display: block;
+                opacity: 1;
+                transform: translateY(0);
+            }
+    </style>
+}
+
+<h2>Alumni</h2>
+
+<button id="createButton" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+    Add New
+</button>
+
+<a href="@Url.Action("ExportToExcel","Alumni")" class="btn btn-primary">
+    Export to Excel
+</a>
+
+@*delete checkbox*@
+<button id="deleteSelected" class="btn btn-danger">Delete Selected</button>
+
+<!-- Button to Open the Modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+    Upload File
+</button>
+
+<!-- The Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Upload Alumni Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Select Excel File (.xlsx, .xls)</label>
+                        <input type="file" accept=".xlsx, .xls" required name="file" class="form-control" id="file" />
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-success">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <label for="facultyFilter">Filter by Faculty:</label>
+        <select id="facultyFilter" class="form-select">
+            <option value="">All Faculties</option>
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label for="majorFilter">Filter by Major:</label>
+        <select id="majorFilter" class="form-select">
+            <option value="">All Majors</option>
+        </select>
+    </div>
+</div>
+
+<div style="overflow-x: auto; max-width: 100%;">
+    <table class="table" id="alumnisData" style="width:100%;">
+        <thead>
+            <tr>
+                <th style="width: 3%; text-align: center;"><input type="checkbox" id="selectAll" /></th>
+                <th style="width: 8%;">Actions</th>
+                <th style="width: 4%;">No.</th>
+
+                <th style="width: 12%;">@Html.DisplayNameFor(model => model.FullNames)</th>
+                <th style="width: 7%;">Photo</th>
+                <th style="width: 6%;">Gender</th>
+
+                <!-- Lebar Email dikurangi dan dibuat wrap -->
+                <th style="width: 15%; max-width: 180px; white-space: normal; word-wrap: break-word;">@Html.DisplayNameFor(model => model.Email)</th>
+
+                <!-- Mobile Number tetap -->
+                <th style="width: 10%; max-width: 150px; white-space: normal; word-wrap: break-word;">@Html.DisplayNameFor(model => model.MobileNumber)</th>
+
+                <!-- Alamat wrap tetapi tidak terlalu kecil -->
+                <th style="width: 18%; max-width: 200px; white-space: normal; word-wrap: break-word;">Alamat</th>
+
+                <th style="width: 10%;">@Html.DisplayNameFor(model => model.DateOfBirth)</th>
+                <th style="width: 7%;">@Html.DisplayNameFor(model => model.GraduationYear)</th>
+
+                <!-- Faculty & Major wrap dengan batasan lebar -->
+                <th style="width: 14%; max-width: 180px; white-space: normal; word-wrap: break-word;">@Html.DisplayNameFor(model => model.FacultyNames)</th>
+                <th style="width: 14%; max-width: 180px; white-space: normal; word-wrap: break-word;">@Html.DisplayNameFor(model => model.MajorNames)</th>
+
+                <!-- LinkedIn wrap tapi tidak terlalu kecil -->
+                <th style="width: 12%; max-width: 170px; white-space: normal; word-wrap: break-word;">@Html.DisplayNameFor(model => model.LinkedInProfile)</th>
+
+                <th style="width: 8%;">Hobbies</th>
+                <th style="width: 10%;">@Html.DisplayNameFor(model => model.ModifiedDate)</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+
+
+<button onclick="scrollToTop()" id="scrollTopBtn" title="Go to top">
+    ⬆ Scroll to Top
+</button>
+
+
+<!-- Modal Image Preview-->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" role="dialog" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imagePreviewModalLabel">Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage" src="" alt="Alumni Image" class="img-fluid" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@*Create modal*@
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 800px; width: 100%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createModalLabel">Create Alumni Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @using (Html.BeginForm("Create", "Alumni", FormMethod.Post, new { id = "createForm", enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                //Template location
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-horizontal">
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                <div class="form-group">
+                                    First Name
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    Middle Name
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.MiddleName, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.MiddleName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    Last Name
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    @Html.LabelFor(model => model.Gender, htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.DropDownListFor(model => model.Gender, new List<SelectListItem>
+                                        {
+                                            new SelectListItem { Text = "Male", Value = "Male" },
+                                            new SelectListItem { Text = "Female", Value = "Female" }
+                                        }, "Select Gender", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Gender, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    Mobile Number
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.MobileNumber, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.MobileNumber, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    @Html.LabelFor(model => model.Address, htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    Date of Birth
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control", type = "date", max = DateTime.Now.ToString("yyyy-MM-dd") } })
+                                        @Html.ValidationMessageFor(model => model.DateOfBirth, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mt-2">
+                                @Html.Label("State")
+                                @Html.DropDownListFor(model => model.StateID, (IEnumerable<SelectListItem>)ViewBag.StatesList, "Select State", new { @class = "form-control", id = "StateDropdown" })
+                                @Html.ValidationMessageFor(model => model.StateID, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="form-group mt-2">
+                                @Html.Label("District")
+                                @Html.DropDownListFor(model => model.DistrictID,
+                                    ViewBag.DistrictsList as List<SelectListItem> ?? new List<SelectListItem>(),
+                                    "Select District",
+                                    new { @class = "form-control", id = "DistrictDropdown" })
+                                @Html.ValidationMessageFor(model => model.DistrictID, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="form-group mt-2">
+                                @Html.LabelFor(model => model.GraduationYear, htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    <input type="number" id="GraduationYear" name="GraduationYear" class="form-control" min="1960" max="2025" value="@Model?.GraduationYear" />
+                                    @Html.ValidationMessageFor(model => model.GraduationYear, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group mt-2">
+                                @Html.LabelFor(model => model.Degree, htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.DropDownListFor(model => model.Degree, new List<SelectListItem>
+                                    {
+                                        new SelectListItem { Text = "D3", Value = "D3" },
+                                        new SelectListItem { Text = "S1", Value = "S1" },
+                                        new SelectListItem { Text = "S2", Value = "S2" },
+                                        new SelectListItem { Text = "S3", Value = "S3" }
+                                    }, "Select Degree", new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Degree, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group mt-2">
+                                @Html.Label("Faculty")
+                                @Html.DropDownListFor(model => model.FacultyID, (IEnumerable<SelectListItem>)ViewBag.FacultiesList, "Select Faculty", new { @class = "form-control", id = "FacultyDropdown" })
+                                @Html.ValidationMessageFor(model => model.FacultyID, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="form-group mt-2">
+                                @Html.Label("Major")
+                                @Html.DropDownListFor(model => model.MajorID,
+                                    ViewBag.MajorsList as List<SelectListItem> ?? new List<SelectListItem>(),
+                                    "Select Major",
+                                    new { @class = "form-control", id = "MajorDropdown" })
+                                @Html.ValidationMessageFor(model => model.MajorID, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="form-group mt-2">
+                                @Html.LabelFor(model => model.LinkedInProfile, htmlAttributes: new { @class = "control-label col-md-2" })
+                                <div class="col-md-10">
+                                    @Html.EditorFor(model => model.LinkedInProfile, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.ValidationMessageFor(model => model.LinkedInProfile, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                Hobbies
+                                <div class="col-md-8">
+                                    @*@Html.DropDownListFor(model => model.SelectedHobbies, new MultiSelectList(Model.ListHobbies, "Value", "Text"), new { @id = "ddlHobby", @class = "form-control", @multiple = "multiple" })*@
+                                    @Html.DropDownListFor(model => model.SelectedHobbies, (IEnumerable<SelectListItem>)ViewBag.HobbiesList, "Select Hobby", new { @class = "form-control", id = "HobbyDropdown", multiple = "multiple" })
+                                    @Html.ValidationMessageFor(model => model.SelectedHobbies, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+
+                            <div class="form-group mt-2">
+                                Photo
+                                <div class="form-group">
+                                    <input type="file" id="file" name="file" class="form-control" accept="image/*" required onchange="previewImages(event)" />
+                                </div>
+                                <div id="previewContainer" class="mt-3 d-flex flex-wrap"></div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@*Edit modal*@
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 800px; width: 100%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Alumni Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            @using (Html.BeginForm("Edit", "Alumni", FormMethod.Post, new { id = "editForm" }))
+            {
+                @Html.AntiForgeryToken()
+                //Template Edit
+                <div class="modal-body">
+
+                    <div class="form-horizontal">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.AlumniID)
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    First Name
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    Middle Name
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.MiddleName, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.MiddleName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    Last Name
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    @Html.LabelFor(model => model.Gender, htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.DropDownListFor(model => model.Gender, new SelectList(
+                                            new List<SelectListItem>
+                                            {
+                                                new SelectListItem { Text = "Male", Value = "Male" },
+                                                new SelectListItem { Text = "Female", Value = "Female" },
+                                            }, "Value", "Text", ViewBag.SelectedGender), "Select Gender", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Gender, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    Mobile Number
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.MobileNumber, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.MobileNumber, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    @Html.LabelFor(model => model.Address, htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    Date of Birth
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.DateOfBirth, new { htmlAttributes = new { @class = "form-control", type = "date", max = DateTime.Now.ToString("yyyy-MM-dd") } })
+                                        @Html.ValidationMessageFor(model => model.DateOfBirth, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mt-2">
+                                    @Html.Label("State")
+                                    @Html.DropDownListFor(model => model.StateID, (IEnumerable<SelectListItem>)ViewBag.StatesList, "Select State", new { @class = "form-control", id = "EditStateDropdown" })
+                                    @Html.ValidationMessageFor(model => model.StateID, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group mt-2">
+                                    @Html.Label("District")
+                                    @Html.DropDownListFor(model => model.DistrictID, Model.Districts,
+                                        "Select District",
+                                        new { @class = "form-control", id = "EditDistrictDropdown" })
+                                    @Html.ValidationMessageFor(model => model.DistrictID, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group mt-2">
+                                    Graduation Year
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.GraduationYear, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.GraduationYear, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    @Html.LabelFor(model => model.Degree, htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.DropDownListFor(model => model.Degree, new SelectList(
+                                            new List<SelectListItem>
+                                            {
+                                                new SelectListItem { Text = "D3", Value = "D3" },
+                                                new SelectListItem { Text = "S1", Value = "S1" },
+                                                new SelectListItem { Text = "S2", Value = "S2" },
+                                                new SelectListItem { Text = "S3", Value = "S3" }
+                                            }, "Value", "Text", ViewBag.SelectedDegree), "Select Degree", new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.Degree, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2">
+                                    @Html.Label("Faculty")
+                                    @Html.DropDownListFor(model => model.FacultyID, (IEnumerable<SelectListItem>)ViewBag.FacultiesList, "Select Faculty", new { @class = "form-control", id = "EditFacultyDropdown" })
+                                    @Html.ValidationMessageFor(model => model.FacultyID, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="form-group mt-2">
+                                    @Html.Label("Major")
+                                    @Html.DropDownListFor(model => model.MajorID, Model.Majors,
+                                        "Select Major",
+                                        new { @class = "form-control", id = "EditMajorDropdown" })
+                                    @Html.ValidationMessageFor(model => model.MajorID, "", new { @class = "text-danger" })
+                                </div>
+
+                                <div class="form-group mt-2">
+                                    LinkedIn Profile
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.LinkedInProfile, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.LinkedInProfile, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    Hobbies
+                                    <div class="col-md-8">
+                                        @Html.DropDownListFor(model => model.SelectedHobbies, new MultiSelectList(Model.Hobbies, "Value", "Text"), new { @id = "EditHobbyDropdown", @class = "form-control", @multiple = "multiple" })
+                                        @Html.ValidationMessageFor(model => model.SelectedHobbies, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group mt-2">
+                                    <label for="file">Photo</label>
+                                    <input type="file" id="file" name="file" class="form-control" accept="image/*" onchange="EditpreviewImages(event)" />
+                                    <div id="EditpreviewContainer" class="mt-3 d-flex flex-wrap">
+                                        <img src="~/Images/placeholder.png" alt="Alumni Image" class="img-thumbnail img-preview" style="width: 200px; height: auto;" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.1.7/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedcolumns/3.3.2/js/dataTables.fixedColumns.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var table = $('#alumnisData').DataTable({
+                "ajax": {
+                    "url": "@Url.Action("GetAlumnis", "Alumni")",
+                    "type": "GET",
+                    data: function (d) {
+                        d.faculty = $('#facultyFilter').val(); // Kirim filter faculty
+                        d.major = $('#majorFilter').val(); // Kirim filter major
+                    },
+                    "datatype": "json"
+                },
+                "columns": [
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return '<input type="checkbox" class="selectCheckbox" data-id="' + row.AlumniID + '" />';
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            var basePath = '@Url.Content("~/App_Data/AlumniPhotos/")'; // Trailing slash included
+                            var jhLink = '@Url.Action("Index", "JobHistory", new { alumniID = "PLACEHOLDER" })'.replace("PLACEHOLDER", row.AlumniID);
+                            var imageLink = '@Url.Action("Index", "AlumniImage", new { alumniID = "PLACEHOLDER" })'.replace("PLACEHOLDER", row.AlumniID);
+
+                            var photoUrl = row.PhotoName ? basePath + row.PhotoName : "";
+                            return '<div style="display: flex; gap: 5px;">' +
+                                '<a href="javascript:void(0);" class="btn btn-primary" data-id="' + row.AlumniID + '" id="editButton">Edit</a>' +
+                                '<a href="' + jhLink + '" class="btn btn-primary">Jobs</a>' +
+                                '<a href="' + imageLink + '" class="btn btn-primary">Images</a>' +
+                                '<button class="btn btn-danger deleteButton" data-id="' + row.AlumniID + '">Delete</button>' +
+                                '</div>';
+                        }
+                    },
+                    {
+                        "data": null,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + 1;
+                        }
+                    },
+                    { "data": "FullNames" },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            var imagePath = row.PhotoPath ? row.PhotoPath.replace("~", "") + '/' + row.PhotoName : '~/Images/placeholder.png';
+                            return '<img src="' + imagePath + '" alt="Alumni Image" class="img-thumbnail img-preview" ' +
+                                'onclick="showImagePreview(\'' + imagePath + '\')" ' +
+                                'style="width: 50px; height: 50px; object-fit: cover;" />';
+                        }
+                    },
+                    {"data": "Gender"},
+                    { "data": "Email" },
+                    { "data": "MobileNumber" },
+                    {
+                        "data": "FullAddresses",
+                        "className": "full-address",
+                    },
+                    {
+                        "data": "DateOfBirth",
+                        "render": function (data, type, row) {
+                            return moment(data).format('DD-MMM-YYYY');
+                        },
+                        "className": "date-of-birth"
+                    },
+                    { "data": "GraduationYear" },
+                    { "data": "FacultyNames" },
+                    { "data": "MajorNames" },
+                    { "data": "LinkedInProfile" },
+                    { "data": "HobbyDisplay" },
+                    {
+                        "data": "ModifiedDate",
+                        "render": function (data, type, row) {
+                            return moment(data).format('DD-MMM-YYYY hh:mm:ss A');
+                        },
+                        "className": "last-update"
+                    }
+                ],
+                "dom": '<"top"f>rt<"bottom d-flex justify-content-between align-items-center"<"col-md-4"l><"col-md-4 d-flex justify-content-center"p><"col-md-4 text-end"i>><"clear">',
+                "pagingType": "full_numbers",
+                "pageLength": 10,
+                "lengthMenu": [5, 10, 20, 30, 100],
+                "scrollY": "400px",
+                "scrollX": true,
+                "scrollCollapse": true,
+                "fixedHeader": true,
+                "language": {
+                    "paginate": {
+                        "previous": "Previous",
+                        "next": "Next",
+                        "first": "<<",
+                        "last": ">>"
+                    }
+                },
+                //"rowCallback": function (row, data, index) {
+                //    if (data.Gender && data.Gender.trim().toLowerCase() === "female") {
+                //        $(row).css("background-color", "#f8d7da"); // Warna merah muda untuk Female
+                //    } else if (data.Gender && data.Gender.trim().toLowerCase() === "male") {
+                //        $(row).css("background-color", "#d4edda"); // Warna hijau muda untuk Male
+                //    }
+                //},
+                "fixedColumns": {
+                    "leftColumns" : 4
+                }
+            });
+            //----------------------------------------------Filter Faculty and Major-------------------------------------------
+
+            // Event listener untuk filter faculty
+            $('#facultyFilter').on('change', function () {
+                var selectedFaculty = $(this).val();
+
+                // Reset dropdown major saat faculty berubah
+                $('#majorFilter').empty().append('<option value="">-- Select Major --</option>');
+
+                // Ambil daftar major berdasarkan faculty yang dipilih
+                if (selectedFaculty) {
+                    $.ajax({
+                        url: '@Url.Action("GetMajorsByFaculty", "Alumni")',
+                        type: 'GET',
+                        data: { faculty: selectedFaculty },
+                        success: function (data) {
+                            $.each(data, function (index, major) {
+                                $('#majorFilter').append('<option value="' + major + '">' + major + '</option>');
+                            });
+                        }
+                    });
+                }
+
+                table.ajax.reload(); // Reload DataTables setelah filter faculty berubah
+            });
+
+            // Event listener untuk filter major
+            $('#majorFilter').on('change', function () {
+                table.ajax.reload(); // Reload DataTables setelah filter major berubah
+            });
+
+            $('#alumnisData_filter input').unbind();
+            $('#alumnisData_filter input').on('keyup', function (e) {
+                var value = $(this).val();
+                if (value.length >= 3 || value.length === 0) {
+                    table.search(value).draw();
+                }
+            });
+            $(document).on('click', '.deleteButton', function () {
+                const itemId = $(this).data('id');
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "Once deleted, you will not be able to recover this item!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete it!",
+                    cancelButtonText: "Cancel",
+                    dangerMode: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/Alumni/Delete',
+                            type: 'POST',
+                            data: { id: itemId },
+                            success: function (response) {
+                                if (response.success) {
+                                    Swal.fire("Deleted!", response.message, "success").then(() => {
+                                        table.ajax.reload();
+                                    });
+                                } else {
+                                    Swal.fire("Error!", response.message, "error");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Error!", "Unable to delete the item. Please try again.", "error");
+                            }
+                        });
+                    }
+                });
+            });
+            $('#selectAll').on('click', function () {
+                var rows = table.rows({ 'search': 'applied' }).nodes();
+                $('input[type="checkbox"]', rows).prop('checked', this.checked);
+            });
+            $('#deleteSelected').on('click', function () {
+                var selectedIds = [];
+                $('.selectCheckbox:checked').each(function () {
+                    selectedIds.push($(this).data('id'));
+                });
+                if (selectedIds.length > 0) {
+                    Swal.fire({
+                        title: "Are you sure? you will not be able to recover these items!",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, delete them!",
+                        cancelButtonText: "No, keep them"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Make an AJAX call to delete the selected items
+                            $.ajax({
+                                url: '/Alumni/DeleteSelected',  //CHANGE THE URL
+                                type: 'POST',
+                                data: { ids: selectedIds },
+                                traditional: true,
+                                success: function (response) {
+                                    if (response.success) {
+                                        Swal.fire("Deleted!", response.message, "success").then(() => {
+                                            $('#alumnisData').DataTable().ajax.reload(); // CHANGE THE TABLE ID
+                                        });
+                                    } else {
+                                        Swal.fire("Error!", response.message, "error");
+                                    }
+                                },
+                                error: function (error) {
+                                    Swal.fire("Error!", "Unable to delete the items. Please try again.", "error");
+                                }
+                            });
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            Swal.fire("Cancelled", "Your items are safe :)", "error");
+                        }
+                    });
+                } else {
+                    Swal.fire("No items selected", "Please select items to delete.", "info");
+                }
+            });
+
+            //Inisiasi Select2 Dropdown
+            $('#createModal').on('shown.bs.modal', function () {
+                $('#createModal #FacultyDropdown').select2({
+                    placeholder: "Select Faculty",
+                    allowClear: true,
+                    dropdownParent: $('#createModal')
+                });
+                $('#createModal #DistrictDropdown').select2({
+                    placecholder: "Dipilih gan District nya",
+                    allowClear: true,
+                    dropdownParent: $('#createModal')
+                });
+                $('#createModal #HobbyDropdown').select2({
+                    placecholder: "Dipilih gan Hobby nya",
+                    allowClear: true,
+                    dropdownParent: $('#createModal')
+                });
+            });
+
+            $('#editModal').on('shown.bs.modal', function () {
+                $('#editModal #EditFacultyDropdown').select2({
+                    placeholder: "Select Faculty",
+                    allowClear: true,
+                    dropdownParent: $('#editModal')
+                });
+                $('#editModal #EditDistrictDropdown').select2({
+                    placeholder: "Dipilih gan District nya",
+                    allowClear: true,
+                    dropdownParent: $('#editModal')
+                });
+                //$('#editModal #EditHobbyDropdown').select2({
+                //    placeholder: "Dipilih gan Hobby nya",
+                //    allowClear: true,
+                //    dropdownParent: $('#editModal')
+                //});
+            });
+
+            //Create form JS
+            $(document).ready(function () {
+                $('#createForm').submit(function (e) {
+                    e.preventDefault();
+
+                    var formData = new FormData(this); // Buat objek FormData
+
+                    $.ajax({
+                        url: $(this).attr("action"), // URL form action
+                        type: "POST", // Metode pengiriman
+                        data: formData, // Data form
+                        processData: false, // Jangan proses data
+                        contentType: false, // Jangan set content type
+                        success: function (response) {
+                            if (response.success) {
+                                $('#createModal').modal('hide'); // Close modal
+                                $('#createForm')[0].reset();
+                                $('#alumnisData').DataTable().ajax.reload(); //CHANGE THE TABLE ID
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success',
+                                    text: "Alumni added succesfully",
+                                    timer: 5000,
+                                    timerProgressBar: true,
+                                    showConfirmButton: false
+                                });
+                                $('#previewContainer').empty();
+
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: response.errorMsg,
+                                    showConfirmButton: true // Show OK button
+                                });
+
+                            }
+                        },
+                        error: function (xhr) {
+                            console.error(xhr.responseText);
+                            alert('An error occurred while saving.');
+                        }
+                    });
+                });
+            });
+
+            //Edit form JS
+            $(document).on('click', '#editButton', function () {
+                var alumniID = $(this).data('id'); // CHANGE VARIABLE NAME
+
+                // Make an AJAX request to get the data for the selected ProductCategory
+                $.ajax({
+                    url: '/Alumni/GetAlumniID/' + alumniID, // CHANGE THE URL
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        let photoPath = response.PhotoPath ? response.PhotoPath.replace("~", "") + '/' + response.PhotoName : '~/Images/placeholder.png';
+
+                        // Populate the form fields with the data returned from the server // CHANGE THE CONTENTS
+                        $('#editModal #AlumniID').val(response.AlumniID); // Assuming you have a hidden field for ID
+                        $('#editModal #FirstName').val(response.FirstName);
+                        $('#editModal #MiddleName').val(response.MiddleName);
+                        $('#editModal #LastName').val(response.LastName);
+                        $('#editModal #Gender').val(response.Gender);
+                        $('#editModal #Email').val(response.Email);
+                        $('#editModal #MobileNumber').val(response.MobileNumber);
+                        $('#editModal #Address').val(response.Address);
+                        $('#editModal #EditStateDropdown').val(response.StateID);
+                        $('#editModal #GraduationYear').val(response.GraduationYear);
+                        $('#editModal #Degree').val(response.Degree);
+                        $('#editModal #EditFacultyDropdown').val(response.FacultyID);
+                        $('#editModal #LinkedInProfile').val(response.LinkedInProfile);
+                        $('#editModal #EditpreviewContainer img').attr('src', photoPath.trim());
+
+                        // Show the Edit Modal
+                        $('#editModal').modal('show');
+
+                        // Populate Date of Birth
+                        if (response.DateOfBirth) {
+                            var formattedDate = moment(response.DateOfBirth).format('YYYY-MM-DD');
+                            $('#editModal #DateOfBirth').val(formattedDate);
+                        }
+
+                        // Populate Districts
+                        var districtDropdown = $('#EditDistrictDropdown');
+                        districtDropdown.empty();
+                        districtDropdown.append('<option value="">Select District</option>');
+                        $.each(response.Districts, function (index, item) {
+                            var selected = item.Selected ? 'selected' : '';
+                            districtDropdown.append('<option value="' + item.Value + '" ' + selected + '>' + item.Text + '</option>');
+                        });
+
+                        // Populate Majors
+                        var majorDropdown = $('#EditMajorDropdown');
+                        majorDropdown.empty();
+                        majorDropdown.append('<option value="">Select Major</option>');
+                        $.each(response.Majors, function (index, item) {
+                            var selected = item.Selected ? 'selected' : '';
+                            majorDropdown.append('<option value="' + item.Value + '" ' + selected + '>' + item.Text + '</option>');
+                        });
+
+                        // Populate Hobbies (MultiSelect Dropdown)
+                        var hobbiesDropdown = $('#editModal #EditHobbyDropdown');
+                        hobbiesDropdown.empty();
+                        $.each(response.Hobbies, function (index, item) {
+                            var selected = item.Selected ? 'selected' : '';
+                            hobbiesDropdown.append('<option value="' + item.Value + '" ' + selected + '>' + item.Text + '</option>');
+                        });
+                        // Jika menggunakan Select2, trigger refresh
+                        hobbiesDropdown.trigger('change');
+
+
+
+
+                        // Initialize Select2 for Hobbies dropdown
+                        $('#EditHobbyDropdown').select2({
+                            placeholder: 'Select Hobbies',
+                            allowClear: true,
+                            dropdownParent: $('#editModal')
+                        });
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        alert('An error occurred while fetching data.');
+                    }
+                });
+            });
+
+            $('#editForm').submit(function (e) {
+                e.preventDefault();
+
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: $(this).attr('action'), // Form action URL
+                    type: 'POST',
+                    data: formData, // Use FormData
+                    processData: false, // Prevent jQuery from automatically transforming the data into a query string
+                    contentType: false, // Set content type to false to let the browser set it to multipart/form-data
+                    success: function (response) {
+                        if (response.success) {
+                            $('#editModal').modal('hide'); // Close the modal
+                            $('#alumnisData').DataTable().ajax.reload(); // Reload the DataTable
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: "Edit Alumni Successful",
+                                timer: 5000,
+                                timerProgressBar: true,
+                                showConfirmButton: false
+                            });
+
+                            // Clear image preview
+                            $('#EditpreviewContainer').empty();
+
+                            // Reset form fields
+                            $('#editForm')[0].reset();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.errorMsg,
+                                showConfirmButton: true // Show OK button
+                            });
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error(xhr.responseText);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while saving.',
+                            showConfirmButton: true // Show OK button
+                        });
+                    }
+                });
+            });
+
+
+            //Cascading dropdown JS for create modal
+            $(document).ready(function () {
+                $('#StateDropdown').change(function () {
+                    var selectedState = $(this).val();
+                    if (selectedState) {
+                        $.ajax({
+                            url: '@Url.Action("GetDistrictsByStateID", "Alumni")',
+                            type: 'GET',
+                            data: { stateID: selectedState },
+                            dataType: 'json',
+                            success: function (data) {
+                                var districtDropdown = $('#DistrictDropdown');
+                                districtDropdown.empty();
+                                districtDropdown.append($('<option></option>').val('').text('Select District'));
+
+                                $.each(data, function (i, item) {
+                                    districtDropdown.append($('<option></option>').val(item.DistrictID).text(item.DistrictNames));
+                                });
+                            },
+                            error: function (xhr, status, error) {
+                                console.error("AJAX Error:", error);
+                                alert('Error retrieving districts.');
+                            }
+                        });
+                    } else {
+                        $('#DistrictDropdown').empty().append($('<option></option>').val('').text('Select District'));
+                    }
+                });
+            });
+            $(document).ready(function () {
+                $('#FacultyDropdown').change(function () {
+                    var selectedFaculty = $(this).val();
+                    if (selectedFaculty) {
+                        $.ajax({
+                            url: '@Url.Action("GetMajorByFacultyID", "Alumni")',
+                            type: 'GET',
+                            data: { facultyID: selectedFaculty },
+                            dataType: 'json',
+                            success: function (data) {
+                                var majorDropdown = $('#MajorDropdown');
+                                majorDropdown.empty();
+                                majorDropdown.append($('<option></option>').val('').text('Select Major'));
+
+                                $.each(data, function (i, item) {
+                                    majorDropdown.append($('<option></option>').val(item.MajorID).text(item.MajorNames));
+                                });
+                            },
+                            error: function (xhr, status, error) {
+                                console.error("AJAX Error:", error);
+                                alert('Error retrieving majors.');
+                            }
+                        });
+                    } else {
+                        $('#MajorDropdown').empty().append($('<option></option>').val('').text('Select Major'));
+                    }
+                });
+            });
+
+            //Cascading dropdown for edit modal
+            $(document).ready(function () {
+                $('#EditStateDropdown').change(function () {
+                    var selectedState = $(this).val();
+                    if (selectedState) {
+                        $.ajax({
+                            url: '@Url.Action("GetDistrictsByStateID", "Alumni")',
+                            type: 'GET',
+                            data: { stateID: selectedState },
+                            dataType: 'json',
+                            success: function (data) {
+                                var districtDropdown = $('#EditDistrictDropdown');
+                                districtDropdown.empty();
+                                districtDropdown.append($('<option></option>').val('').text('Select District'));
+
+                                $.each(data, function (i, item) {
+                                    districtDropdown.append($('<option></option>').val(item.DistrictID).text(item.DistrictNames));
+                                });
+                            },
+                            error: function (xhr, status, error) {
+                                console.error("AJAX Error:", error);
+                                alert('Error retrieving districts.');
+                            }
+                        });
+                    } else {
+                        $('#EditDistrictDropdown').empty().append($('<option></option>').val('').text('Select District'));
+                    }
+                });
+            });
+            $(document).ready(function () {
+                $('#EditFacultyDropdown').change(function () {
+                    var selectedFaculty = $(this).val();
+                    if (selectedFaculty) {
+                        $.ajax({
+                            url: '@Url.Action("GetMajorByFacultyID", "Alumni")',
+                            type: 'GET',
+                            data: { facultyID: selectedFaculty },
+                            dataType: 'json',
+                            success: function (data) {
+                                var majorDropdown = $('#EditMajorDropdown');
+                                majorDropdown.empty();
+                                majorDropdown.append($('<option></option>').val('').text('Select Major'));
+
+                                $.each(data, function (i, item) {
+                                    majorDropdown.append($('<option></option>').val(item.MajorID).text(item.MajorNames));
+                                });
+                            },
+                            error: function (xhr, status, error) {
+                                console.error("AJAX Error:", error);
+                                alert('Error retrieving majors.');
+                            }
+                        });
+                    } else {
+                        $('#EditMajorDropdown').empty().append($('<option></option>').val('').text('Select Major'));
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        function showImagePreview(imagePath) {
+            $('#previewImage').attr('src', imagePath);
+            $('#imagePreviewModal').modal('show');
+        }
+        function previewImages(event) {
+            let previewContainer = document.getElementById("previewContainer");
+            previewContainer.innerHTML = ""; // Reset preview setiap kali memilih file baru
+
+            let files = event.target.files;
+            if (files.length === 0) return;
+
+            for (let i = 0; i < files.length; i++) {
+                let file = files[i];
+                if (!file.type.startsWith("image/")) continue; // Hanya gambar yang bisa dipreview
+
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    let img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.classList.add("img-thumbnail", "m-1");
+                    img.style.maxWidth = "300px"; // Maksimal lebar 300px
+                    img.style.maxHeight = "300px"; // Maksimal tinggi 300px
+                    img.style.objectFit = "contain"; // Pastikan gambar tidak terdistorsi
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function EditpreviewImages(event) {
+            let previewContainer = document.getElementById("EditpreviewContainer");
+            previewContainer.innerHTML = ""; // Hapus preview lama
+
+            let files = event.target.files;
+            if (files.length === 0) return;
+
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith("image/")) return;
+
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    let img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.classList.add("img-thumbnail", "m-1");
+                    img.style.width = "200px";  // Set lebar gambar
+                    img.style.height = "auto";  // Biar proporsi tetap rapi
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Tampilkan tombol ketika pengguna scroll ke bawah
+        window.onscroll = function () {
+            var btn = document.getElementById("scrollTopBtn");
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                btn.classList.add("show");
+            } else {
+                btn.classList.remove("show");
+            }
+        };
+
+        // Fungsi untuk scroll ke atas dengan efek smooth
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+
+    </script>
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                url: '@Url.Action("GetFacultyMajorData", "Alumni")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    if (response.faculties && response.majors) {
+                        // Mengisi dropdown fakultas
+                        var facultyDropdown = $('#facultyFilter');
+                        facultyDropdown.append('<option value="">-- Pilih Fakultas --</option>');
+                        $.each(response.faculties, function (index, item) {
+                            facultyDropdown.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+                        });
+
+                        // Mengisi dropdown jurusan
+                        var majorDropdown = $('#majorFilter');
+                        majorDropdown.append('<option value="">-- Pilih Jurusan --</option>');
+                        $.each(response.majors, function (index, item) {
+                            majorDropdown.append('<option value="' + item.Value + '">' + item.Text + '</option>');
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.log("Error fetching faculty and major data:", error);
+                }
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $("#uploadForm").submit(function (e) {
+                e.preventDefault(); // Mencegah reload halaman
+
+                var formData = new FormData(this); // Mengambil file yang diunggah
+
+                $.ajax({
+                    url: "/Alumni/AlumniImportToExcel",
+                    type: "POST",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    beforeSend: function () {
+                        Swal.fire({
+                            title: "Uploading...",
+                            text: "Please wait while we process your file.",
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                    },
+                    success: function (response) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Upload Successful",
+                            text: "Alumni data has been uploaded successfully!",
+                            timer: 3000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            $("#uploadModal").modal("hide"); // Tutup modal
+                            $("#uploadForm")[0].reset(); // Reset form
+                            // Refresh halaman atau tabel jika diperlukan
+                            location.reload();
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Upload Failed",
+                            text: "An error occurred: " + xhr.responseText,
+                            footer: "Please check your file and try again."
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+}
